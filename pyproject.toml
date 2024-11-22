@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "os-computer-use"
+version = "0.1.0"
+description = ""
+authors = ["James Murdza <james@jamesmurdza.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+qwen-agent = "^0.0.10"
+e2b = "^1.0.3"
+fireworks-ai = "^0.15.8"
+ipython = "^8.29.0"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.scripts]
+start = "main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
