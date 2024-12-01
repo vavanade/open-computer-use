@@ -1,9 +1,7 @@
 from PIL import ImageDraw
 import re
-import base64
-import io
-import fireworks.client
 from os_computer_use.llm import osatlas_config
+from gradio_client import Client
 
 
 def draw_big_dot(image, coordinates, color="red", radius=12):
@@ -14,31 +12,22 @@ def draw_big_dot(image, coordinates, color="red", radius=12):
     return image
 
 
-def convert_to_base64(image):
-    image_format = "JPEG" if image.format == "JPEG" else "PNG"
-    mime_type = f"image/{image_format.lower()}"
-    buffered = io.BytesIO()
-    image.save(buffered, format=image_format)
-    return base64.b64encode(buffered.getvalue()).decode("utf-8"), mime_type
-
-
-def send_bbox_request(image_base64, mime_type, prompt):
-    system_prompt = "Respond to the user's query and always respond in the format of: <|box_start|>(x,y),(x,y)<|box_end|>"
-    image = [
-        {"type": "text", "text": prompt},
-        {
-            "type": "image_url",
-            "image_url": {"url": f"data:{mime_type};base64,{image_base64}"},
-        },
-    ]
-    response = fireworks.client.ChatCompletion.create(
-        model=osatlas_config["model"],
-        messages=[
-            {"role": "system", "content": [{"type": "text", "text": system_prompt}]},
-            {"role": "user", "content": image},
-        ],
-    )
-    return response.choices[0].message.content
+def send_bbox_request(image_data, prompt):
+    try:
+        client = Client(osatlas_config["source"])
+        result = client.predict(
+            image=image_data,
+            text_input=prompt + "\nReturn the response in the form of a bbox",
+            model_id=osatlas_config["model"],
+            api_name=osatlas_config["api_name"],
+        )
+        midpoint = extract_bbox_midpoint(result[1])
+        print(result[2])
+        if not midpoint:
+            raise ValueError("The bbox response is malformed.")
+        return midpoint
+    except Exception as e:
+        return None
 
 
 def extract_bbox_midpoint(bbox_response):
