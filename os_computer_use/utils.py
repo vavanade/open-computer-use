@@ -34,7 +34,7 @@ def send_bbox_request(image_data, prompt):
 def extract_bbox_midpoint(bbox_response):
     match = re.search(r"<\|box_start\|>(.*?)<\|box_end\|>", bbox_response)
     inner_text = match.group(1) if match else bbox_response
-    numbers = [int(num) for num in re.findall(r"\d+", inner_text)]
+    numbers = [float(num) for num in re.findall(r"\d+\.\d+|\d+", inner_text)]
     if len(numbers) == 2:
         return numbers[0], numbers[1]
     elif len(numbers) >= 4:
