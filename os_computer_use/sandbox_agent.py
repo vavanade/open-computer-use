@@ -1,12 +1,11 @@
 from os_computer_use.utils import (
-    convert_to_base64,
     send_bbox_request,
-    extract_bbox_midpoint,
     draw_big_dot,
 )
 from os_computer_use.agent import QwenAgent
 
 from qwen_agent.llm.schema import ContentItem
+from gradio_client import handle_file
 
 import shlex
 import json
@@ -147,13 +146,17 @@ class SandboxAgent(QwenAgent):
     def locate_coordinates(self, query):
         self.screenshot()
         original_image = Image.open(self.latest_screenshot)
-        image_base64, mime_type = convert_to_base64(original_image)
-        bbox_response = send_bbox_request(image_base64, mime_type, query)
-        x_scaled, y_scaled = extract_bbox_midpoint(bbox_response)
-        image_width, image_height = original_image.size
-        x, y = int(x_scaled * image_width / 1000), int(y_scaled * image_height / 1000)
-        display.display(draw_big_dot(original_image, (x, y)))
-        return f"({x},{y})"
+        image_data = handle_file(self.latest_screenshot)
+        response = send_bbox_request(image_data, query)
+        if response:
+            x_scaled, y_scaled = response
+            image_width, image_height = original_image.size
+            x = int(x_scaled * image_width / 1000)
+            y = int(y_scaled * image_height / 1000)
+            display.display(draw_big_dot(original_image, (x, y)))
+            return f"({x},{y})"
+        else:
+            return "The requested item could not be located on the screen."
 
     def click(self, x, y):
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")

@@ -1,5 +1,4 @@
 from qwen_agent.llm import get_chat_model
-import fireworks.client
 import os
 from dotenv import load_dotenv
 
@@ -16,9 +15,10 @@ qwenvl_config = {
 qwen = get_chat_model(qwenvl_config)
 
 # Use Fireworks to run OS-Atlas-Base-7B
-fireworks.client.api_key = os.getenv("FIREWORKS_API_KEY")
 osatlas_config = {
-    "model": "accounts/jamesmurdza-2250f2/models/os-atlas-base-7b",
+    "source": "maxiw/OS-ATLAS",
+    "model": "OS-Copilot/OS-Atlas-Base-7B",
+    "api_name": "/run_example",
 }
 
 # Configure E2B
