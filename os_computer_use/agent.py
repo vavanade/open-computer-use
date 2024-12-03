@@ -6,6 +6,7 @@ Before using the click tool, always use locate_coordinates to decide where you s
 You can start GUI applications, but you need to use run_background_command instead of run_command.
 GUI apps run this way may take some time to appear. Take a screenshot to confirm it did.
 The command to open Firefox GUI is firefox-esr (use a background command).
+When there is a next step, always procede to the next step without being asked.
 """
 
 
