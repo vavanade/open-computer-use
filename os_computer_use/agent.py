@@ -18,13 +18,15 @@ class QwenAgent:
         self.messages = []
         self.function_map = {}
 
-    def call_function(self, func_name, func_args):
+    def call_function(self, function_call):
         def function_response(message):
             return {"role": "function", "name": func_name, "content": message}
 
+        func_name = function_call["name"].lower()
         func_impl = self.function_map.get(func_name)
         if func_impl:
             try:
+                func_args = json.loads(function_call["arguments"])
                 result = func_impl(**func_args) if func_args else func_impl()
                 return function_response(result)
             except Exception as e:
@@ -39,9 +41,7 @@ class QwenAgent:
         for rsp in responses:
             if rsp.get("function_call", None):
                 called_function = True
-                func_name = rsp["function_call"]["name"].lower()
-                func_args = json.loads(rsp["function_call"]["arguments"])
-                func_rsp = self.call_function(func_name, func_args)
+                func_rsp = self.call_function(rsp["function_call"])
                 self.messages.append(func_rsp)
                 print(func_rsp)
         return called_function
