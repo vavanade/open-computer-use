@@ -111,7 +111,7 @@ class SandboxAgent(QwenAgent):
     def screenshot(self):
         filename = SCREENSHOT_PATH
         with open(filename, "wb") as f:
-            file = self.sandbox.screenshot()
+            file = self.sandbox.take_screenshot()
             f.write(file)
         display.display(display.Image(filename))
         self.latest_screenshot = filename

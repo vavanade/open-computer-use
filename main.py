@@ -1,4 +1,4 @@
-from os_computer_use.sandbox import Sandbox
+from e2b_desktop import Sandbox
 from os_computer_use.sandbox_agent import SandboxAgent
 from os_computer_use.llm import qwen
 
