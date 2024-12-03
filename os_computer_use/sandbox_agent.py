@@ -117,7 +117,6 @@ class SandboxAgent(QwenAgent):
         self.latest_screenshot = filename
         return [
             ContentItem(image=filename),
-            ContentItem(text=f"(The URL of this image is {filename})"),
         ]
 
     def run_command(self, command):
