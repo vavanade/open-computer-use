@@ -117,12 +117,17 @@ class SandboxAgent(QwenAgent):
         self.latest_screenshot = filename
         return [
             ContentItem(image=filename),
-            ContentItem(text=f"(The URL of this image is {filename})"),
         ]
 
     def run_command(self, command):
         result = self.sandbox.commands.run(command)
-        return [{"text": json.dumps({"output": result.stdout, "error": result.stderr})}]
+        stdout, stderr = result.stdout, result.stderr
+        if stdout and stderr:
+            return [{"text": stdout + "\n" + stderr}]
+        elif stdout or stderr:
+            return [{"text": stdout + stderr}]
+        else:
+            return [{"text": "Done."}]
 
     def run_background_command(self, command):
         self.sandbox.commands.run(command, background=True)
@@ -161,6 +166,7 @@ class SandboxAgent(QwenAgent):
     def click(self, x, y):
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
         self.sandbox.commands.run("xdotool click 1")
+        return [{"text": "Done."}]
 
     def run(self, instruction):
         super().initialize(instruction)
