@@ -8,13 +8,12 @@ from qwen_agent.llm.schema import ContentItem
 from gradio_client import handle_file
 
 import shlex
-import json
+import os
+import tempfile
 from PIL import Image
-from IPython import display
 
 TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
-SCREENSHOT_PATH = "./screenshot.png"
 
 
 class SandboxAgent(QwenAgent):
@@ -107,13 +106,26 @@ class SandboxAgent(QwenAgent):
             "locate_coordinates": self.locate_coordinates,
             "click": self.click,
         }
+        # Create temporary directory
+        self.tmp_dir = tempfile.mkdtemp()
+        self.image_counter = 0
+
+    def save_image(self, image, prefix="image"):
+        """Save image to temporary directory with incrementing counter."""
+        self.image_counter += 1
+        filename = f"{prefix}_{self.image_counter}.png"
+        filepath = os.path.join(self.tmp_dir, filename)
+        if isinstance(image, Image.Image):
+            image.save(filepath)
+        else:
+            with open(filepath, "wb") as f:
+                f.write(image)
+        return filepath
 
     def screenshot(self):
-        filename = SCREENSHOT_PATH
-        with open(filename, "wb") as f:
-            file = self.sandbox.take_screenshot()
-            f.write(file)
-        display.display(display.Image(filename))
+        file = self.sandbox.take_screenshot()
+        filename = self.save_image(file, "screenshot")
+        print(f"Image: {filename}")
         self.latest_screenshot = filename
         return [
             ContentItem(image=filename),
@@ -158,7 +170,12 @@ class SandboxAgent(QwenAgent):
             image_width, image_height = original_image.size
             x = int(x_scaled * image_width / 1000)
             y = int(y_scaled * image_height / 1000)
-            display.display(draw_big_dot(original_image, (x, y)))
+
+            # Save the image with dot instead of displaying
+            dot_image = draw_big_dot(original_image, (x, y))
+            filepath = self.save_image(dot_image, "location")
+            print(f"Image: {filepath}")
+
             return f"({x},{y})"
         else:
             return "The requested item could not be located on the screen."
