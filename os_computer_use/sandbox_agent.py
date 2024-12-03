@@ -164,11 +164,7 @@ class SandboxAgent(QwenAgent):
         self.screenshot()
         original_image = Image.open(self.latest_screenshot)
         image_data = handle_file(self.latest_screenshot)
-        response = send_bbox_request(image_data, query)
-        x_scaled, y_scaled = response
-        image_width, image_height = original_image.size
-        x = int(x_scaled * image_width / 1000)
-        y = int(y_scaled * image_height / 1000)
+        x, y = send_bbox_request(image_data, query)
 
         # Save the image with dot instead of displaying
         dot_image = draw_big_dot(original_image, (x, y))
