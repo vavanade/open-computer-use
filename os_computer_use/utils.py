@@ -15,20 +15,15 @@ def draw_big_dot(image, coordinates, color="red", radius=12):
 
 
 def send_bbox_request(image_data, prompt):
-    try:
-        result = osatlas.predict(
-            image=image_data,
-            text_input=prompt + "\nReturn the response in the form of a bbox",
-            model_id=osatlas_config["model"],
-            api_name=osatlas_config["api_name"],
-        )
-        midpoint = extract_bbox_midpoint(result[1])
-        print("BBOX: " + result[2])
-        if not midpoint:
-            raise ValueError("The bbox response is malformed.")
-        return midpoint
-    except Exception as e:
-        return None
+    result = osatlas.predict(
+        image=image_data,
+        text_input=prompt + "\nReturn the response in the form of a bbox",
+        model_id=osatlas_config["model"],
+        api_name=osatlas_config["api_name"],
+    )
+    midpoint = extract_bbox_midpoint(result[1])
+    print("BBOX: " + result[2])
+    return midpoint
 
 
 def extract_bbox_midpoint(bbox_response):
