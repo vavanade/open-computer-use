@@ -165,20 +165,17 @@ class SandboxAgent(QwenAgent):
         original_image = Image.open(self.latest_screenshot)
         image_data = handle_file(self.latest_screenshot)
         response = send_bbox_request(image_data, query)
-        if response:
-            x_scaled, y_scaled = response
-            image_width, image_height = original_image.size
-            x = int(x_scaled * image_width / 1000)
-            y = int(y_scaled * image_height / 1000)
+        x_scaled, y_scaled = response
+        image_width, image_height = original_image.size
+        x = int(x_scaled * image_width / 1000)
+        y = int(y_scaled * image_height / 1000)
 
-            # Save the image with dot instead of displaying
-            dot_image = draw_big_dot(original_image, (x, y))
-            filepath = self.save_image(dot_image, "location")
-            print(f"Image: {filepath}")
+        # Save the image with dot instead of displaying
+        dot_image = draw_big_dot(original_image, (x, y))
+        filepath = self.save_image(dot_image, "location")
+        print(f"Image: {filepath}")
 
-            return f"({x},{y})"
-        else:
-            return "The requested item could not be located on the screen."
+        return f"({x},{y})"
 
     def click(self, x, y):
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
