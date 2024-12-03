@@ -10,6 +10,26 @@ When there is a next step, always procede to the next step without being asked.
 """
 
 
+def extract_message_values(obj):
+    values = []
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if key != "role":
+                values.extend(extract_message_values(value))
+    elif isinstance(obj, list):
+        for item in obj:
+            values.extend(extract_message_values(item))
+    else:
+        values.append(str(obj))
+    return values
+
+
+def format_message(obj):
+    role = obj.get("role", "")
+    values = extract_message_values(obj)
+    return f"{role.upper()}: {' '.join(value for value in values if value)}"
+
+
 class QwenAgent:
     functions = []
 
@@ -43,7 +63,7 @@ class QwenAgent:
                 called_function = True
                 func_rsp = self.call_function(rsp["function_call"])
                 self.messages.append(func_rsp)
-                print(func_rsp)
+                print(format_message(func_rsp))
         return called_function
 
     def initialize(self, instruction):
@@ -61,11 +81,12 @@ class QwenAgent:
         n = 1
 
         while should_continue:
-            print(f"# Call {n}")
-            for responses in self.qwen.chat(
-                messages=self.messages, functions=self.functions, stream=True
-            ):
-                print(responses)
+            response_stream = self.qwen.chat(
+                messages=self.messages, functions=self.functions
+            )
+            responses = list(response_stream)[-1]
+            for response in responses:
+                print(format_message(response))
             self.messages.extend(responses)
             should_continue = self.execute_function_calls(responses)
             n = n + 1
