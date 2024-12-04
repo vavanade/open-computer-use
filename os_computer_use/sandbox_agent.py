@@ -187,11 +187,14 @@ class SandboxAgent(QwenAgent):
         self.sandbox.commands.run("xdotool click 1")
         return [{"text": "Done."}]
 
+    def append_screenshot(self):
+        self.messages.append({"role": "user", "content": self.screenshot()})
+
     def run(self, instruction):
         self.messages = self.messages or [
             {"role": "system", "content": [{"text": SYSTEM_PROMPT}]},
             {"role": "user", "content": [{"text": instruction}]},
         ]
-        self.screenshot()
+        self.append_screenshot()
         super().run()
-        self.screenshot()
+        self.append_screenshot()
