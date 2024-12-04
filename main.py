@@ -19,14 +19,15 @@ async def start():
         await client.start_display_client(stream_url)
 
         agent = SandboxAgent(qwen, sandbox)
-        agent.run(
-            "Do the following: 1) Open Firefox 2) Use run_command to sleep for two seconds "
-            "3) Click on the URL bar 4) Type a URL."
-        )
+        while True:
+            try:
+                user_input = input("USER: ")
+                agent.run(user_input)
 
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-        raise
+            except KeyboardInterrupt:
+                print("\nExit key pressed.")
+                break
+
     finally:
         if client:
             print("Stopping the display client...")

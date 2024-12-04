@@ -31,6 +31,7 @@ class DisplayClient:
             f"-c:a aac -b:a 128k -f mpegts -loglevel quiet - | tee output.ts | "
             f"ffplay -autoexit -i -loglevel quiet -",
             preexec_fn=os.setsid,
+            stdin=asyncio.subprocess.DEVNULL,
         )
 
     async def stop_display_client(self):
