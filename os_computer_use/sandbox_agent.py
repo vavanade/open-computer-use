@@ -15,6 +15,15 @@ from PIL import Image
 TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
 
+SYSTEM_PROMPT = """
+Follow the request below. Every time you want to take an action, make a system call to the appropriate function.
+Before using the click tool, always use locate_coordinates to decide where you should click.
+You can start GUI applications, but you need to use run_background_command instead of run_command.
+GUI apps run this way may take some time to appear. Take a screenshot to confirm it did.
+The command to open Firefox GUI is firefox-esr (use a background command).
+When there is a next step, always procede to the next step without being asked.
+"""
+
 
 class SandboxAgent(QwenAgent):
     functions = [
@@ -179,7 +188,10 @@ class SandboxAgent(QwenAgent):
         return [{"text": "Done."}]
 
     def run(self, instruction):
-        super().initialize(instruction)
+        self.messages = self.messages or [
+            {"role": "system", "content": [{"text": SYSTEM_PROMPT}]},
+            {"role": "user", "content": [{"text": instruction}]},
+        ]
         self.screenshot()
-        super().run(instruction)
+        super().run()
         self.screenshot()
