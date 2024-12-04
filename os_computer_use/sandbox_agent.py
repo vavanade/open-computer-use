@@ -16,59 +16,58 @@ TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
 
 SYSTEM_PROMPT = """
-Follow the request below. Every time you want to take an action, make a system call to the appropriate function.
-Before using the click tool, always use locate_coordinates to decide where you should click.
-You can start GUI applications, but you need to use run_background_command instead of run_command.
-GUI apps run this way may take some time to appear. Take a screenshot to confirm it did.
-The command to open Firefox GUI is firefox-esr (use a background command).
-When there is a next step, always procede to the next step without being asked.
+Rules:
+- Before starting a task, make a plan based on what you see.
+- Before using the click tool, always use locate_coordinates to decide where to click.
+- After opening an application, use `sleep 2` to wait for it to load.
+- After finished a step, always go on to the next step until are are finished.
 """
 
 
 class SandboxAgent(QwenAgent):
     functions = [
         {
-            "name": "screenshot",
-            "description": "Captures a screenshot of the current system view.",
+            "name": "take_screenshot",
+            "description": "",
             "parameters": {},
         },
         {
             "name": "send_key",
-            "description": "Send a single key or key combination to the system using xdotool.",
+            "description": "",
             "parameters": {
-                "name": "text",
+                "name": "name",
                 "type": "string",
-                "description": "The key or key combination to send",
+                "description": "Key or combination (e.g. 'Return',  'Ctl-C')",
                 "required": True,
             },
         },
         {
             "name": "type_text",
-            "description": "Type text into the system using xdotool with a specified delay.",
+            "description": "",
             "parameters": {
                 "name": "text",
                 "type": "string",
-                "description": "The text to type",
+                "description": "Text to type",
                 "required": True,
             },
         },
         {
             "name": "run_command",
-            "description": "Run a command on the system.",
+            "description": "",
             "parameters": {
                 "name": "command",
                 "type": "string",
-                "description": "The command to run",
+                "description": "Shell command",
                 "required": True,
             },
         },
         {
             "name": "run_background_command",
-            "description": "Run a command on the system without waiting for it to finish.",
+            "description": "",
             "parameters": {
                 "name": "command",
                 "type": "string",
-                "description": "The command to run",
+                "description": "Shell command to run without waiting",
                 "required": True,
             },
         },
@@ -78,7 +77,7 @@ class SandboxAgent(QwenAgent):
             "parameters": {
                 "name": "query",
                 "type": "string",
-                "description": "The action or UI element on the screen to return coordinates for.",
+                "description": "Action or UI element on the screen to return coordinates for",
                 "required": True,
             },
         },
@@ -89,13 +88,13 @@ class SandboxAgent(QwenAgent):
                 {
                     "name": "x",
                     "type": "number",
-                    "description": "The x-coordinate in pixels.",
+                    "description": "Coordinate in pixels",
                     "required": True,
                 },
                 {
                     "name": "y",
                     "type": "number",
-                    "description": "The y-coordinate in pixels.",
+                    "description": "Coordinate in pixels",
                     "required": True,
                 },
             ],
@@ -107,7 +106,7 @@ class SandboxAgent(QwenAgent):
         self.sandbox = sandbox
         self.latest_screenshot = None
         self.function_map = {
-            "screenshot": self.screenshot,
+            "take_screenshot": self.take_screenshot,
             "send_key": self.send_key,
             "type_text": self.type_text,
             "run_command": self.run_command,
@@ -131,14 +130,12 @@ class SandboxAgent(QwenAgent):
                 f.write(image)
         return filepath
 
-    def screenshot(self):
+    def take_screenshot(self):
         file = self.sandbox.take_screenshot()
         filename = self.save_image(file, "screenshot")
         print(f"Image: {filename}")
         self.latest_screenshot = filename
-        return [
-            ContentItem(image=filename),
-        ]
+        return [ContentItem(image=filename)]
 
     def run_command(self, command):
         result = self.sandbox.commands.run(command, timeoutMs=5000)
@@ -154,8 +151,8 @@ class SandboxAgent(QwenAgent):
         self.sandbox.commands.run(command, background=True)
         return [{"text": "Done."}]
 
-    def send_key(self, text):
-        self.sandbox.commands.run(f"xdotool key -- {text}")
+    def send_key(self, name):
+        self.sandbox.commands.run(f"xdotool key -- {name}")
         return [{"text": "Done."}]
 
     def type_text(self, text):
@@ -170,7 +167,7 @@ class SandboxAgent(QwenAgent):
         return [{"text": "Done."}]
 
     def locate_coordinates(self, query):
-        self.screenshot()
+        self.take_screenshot()
         original_image = Image.open(self.latest_screenshot)
         image_data = handle_file(self.latest_screenshot)
         x, y = send_bbox_request(image_data, query)
@@ -188,7 +185,7 @@ class SandboxAgent(QwenAgent):
         return [{"text": "Done."}]
 
     def append_screenshot(self):
-        self.messages.append({"role": "user", "content": self.screenshot()})
+        self.messages.append({"role": "user", "content": self.take_screenshot()})
 
     def run(self, instruction):
         self.messages = self.messages or [
