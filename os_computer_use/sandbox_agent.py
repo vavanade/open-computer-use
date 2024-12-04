@@ -138,7 +138,7 @@ class SandboxAgent(QwenAgent):
         return [ContentItem(image=filename)]
 
     def run_command(self, command):
-        result = self.sandbox.commands.run(command, timeoutMs=5000)
+        result = self.sandbox.commands.run(command, timeout=5)
         stdout, stderr = result.stdout, result.stderr
         if stdout and stderr:
             return [{"text": stdout + "\n" + stderr}]
