@@ -141,7 +141,7 @@ class SandboxAgent(QwenAgent):
         ]
 
     def run_command(self, command):
-        result = self.sandbox.commands.run(command)
+        result = self.sandbox.commands.run(command, timeoutMs=5000)
         stdout, stderr = result.stdout, result.stderr
         if stdout and stderr:
             return [{"text": stdout + "\n" + stderr}]
