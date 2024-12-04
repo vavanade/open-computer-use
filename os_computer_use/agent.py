@@ -1,14 +1,5 @@
 import json
 
-SYSTEM_PROMPT = """
-Follow the request below. Every time you want to take an action, make a system call to the appropriate function.
-Before using the click tool, always use locate_coordinates to decide where you should click.
-You can start GUI applications, but you need to use run_background_command instead of run_command.
-GUI apps run this way may take some time to appear. Take a screenshot to confirm it did.
-The command to open Firefox GUI is firefox-esr (use a background command).
-When there is a next step, always procede to the next step without being asked.
-"""
-
 
 def extract_message_values(obj):
     values = []
@@ -66,16 +57,7 @@ class QwenAgent:
                 print(format_message(func_rsp))
         return called_function
 
-    def initialize(self, instruction):
-        self.messages = [
-            {"role": "system", "content": [{"text": SYSTEM_PROMPT}]},
-            {"role": "user", "content": [{"text": instruction}]},
-        ]
-
-    def run(self, instruction):
-        if not len(self.messages):
-            self.initialize()
-
+    def run(self):
         responses = []
         should_continue = True
         n = 1
