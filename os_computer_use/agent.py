@@ -56,19 +56,3 @@ class QwenAgent:
                 self.messages.append(func_rsp)
                 print(format_message(func_rsp))
         return called_function
-
-    def run(self):
-        responses = []
-        should_continue = True
-        n = 1
-
-        while should_continue:
-            response_stream = self.qwen.chat(
-                messages=self.messages, functions=self.functions
-            )
-            responses = list(response_stream)[-1]
-            for response in responses:
-                print(format_message(response))
-            self.messages.extend(responses)
-            should_continue = self.execute_function_calls(responses)
-            n = n + 1

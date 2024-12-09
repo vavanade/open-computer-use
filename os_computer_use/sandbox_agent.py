@@ -2,7 +2,7 @@ from os_computer_use.utils import (
     send_bbox_request,
     draw_big_dot,
 )
-from os_computer_use.agent import QwenAgent
+from os_computer_use.agent import QwenAgent, format_message
 
 from qwen_agent.llm.schema import ContentItem
 from gradio_client import handle_file
@@ -15,22 +15,9 @@ from PIL import Image
 TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
 
-SYSTEM_PROMPT = """
-Rules:
-- Before starting a task, make a plan based on what you see.
-- Before using the click tool, always use locate_coordinates to decide where to click.
-- After opening an application, use `sleep 2` to wait for it to load.
-- After finished a step, always go on to the next step until are are finished.
-"""
-
 
 class SandboxAgent(QwenAgent):
     functions = [
-        {
-            "name": "take_screenshot",
-            "description": "",
-            "parameters": {},
-        },
         {
             "name": "send_key",
             "description": "",
@@ -72,29 +59,13 @@ class SandboxAgent(QwenAgent):
             },
         },
         {
-            "name": "locate_coordinates",
-            "description": "",
-            "parameters": {
-                "name": "query",
-                "type": "string",
-                "description": "Action or UI element on the screen to return coordinates for",
-                "required": True,
-            },
-        },
-        {
             "name": "click",
             "description": "",
             "parameters": [
                 {
-                    "name": "x",
-                    "type": "number",
-                    "description": "Coordinate in pixels",
-                    "required": True,
-                },
-                {
-                    "name": "y",
-                    "type": "number",
-                    "description": "Coordinate in pixels",
+                    "name": "query",
+                    "type": "string",
+                    "description": "Item or UI element on the screen to click",
                     "required": True,
                 },
             ],
@@ -106,12 +77,10 @@ class SandboxAgent(QwenAgent):
         self.sandbox = sandbox
         self.latest_screenshot = None
         self.function_map = {
-            "take_screenshot": self.take_screenshot,
             "send_key": self.send_key,
             "type_text": self.type_text,
             "run_command": self.run_command,
             "run_background_command": self.run_background_command,
-            "locate_coordinates": self.locate_coordinates,
             "click": self.click,
         }
         # Create temporary directory
@@ -166,7 +135,7 @@ class SandboxAgent(QwenAgent):
             results.append(self.sandbox.commands.run(cmd))
         return [{"text": "Done."}]
 
-    def locate_coordinates(self, query):
+    def click(self, query):
         self.take_screenshot()
         original_image = Image.open(self.latest_screenshot)
         image_data = handle_file(self.latest_screenshot)
@@ -177,21 +146,69 @@ class SandboxAgent(QwenAgent):
         filepath = self.save_image(dot_image, "location")
         print(f"Image: {filepath}")
 
-        return f"({x},{y})"
-
-    def click(self, x, y):
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
         self.sandbox.commands.run("xdotool click 1")
         return [{"text": "Done."}]
 
     def append_screenshot(self):
-        self.messages.append({"role": "user", "content": self.take_screenshot()})
+        # self.messages.append({"role": "user", "content": self.take_screenshot()})
+        messages = [
+            *self.messages,
+            {"role": "user", "content": self.take_screenshot()},
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "text": "Describe anything you see that might be useful."  # and recommend an action to take (using the keyboard, mouse, or shell commands). Alternatively, you can wait for a couple of seconds."
+                    }
+                ],
+            },
+        ]
+        # print(messages)
+        response_stream = self.qwen.chat(messages=messages)
+        new_messages = list(response_stream)[-1]
+        # print(new_messages)
+        for response in new_messages:
+            print(format_message(response))
+        return new_messages
+        # self.messages.extend(new_messages)
 
     def run(self, instruction):
-        self.messages = self.messages or [
-            {"role": "system", "content": [{"text": SYSTEM_PROMPT}]},
-            {"role": "user", "content": [{"text": instruction}]},
-        ]
-        self.append_screenshot()
-        super().run()
-        self.append_screenshot()
+
+        self.messages.extend(
+            [
+                {"role": "user", "content": [{"text": instruction}]},
+            ]
+        )
+
+        responses = []
+        should_continue = True
+        n = 1
+
+        while should_continue:
+            screen_contents = self.append_screenshot()
+            response_stream = self.qwen.chat(
+                messages=[
+                    {
+                        "role": "system",
+                        "content": [
+                            {
+                                "text": "You are an AI assistant with the ability to click, type and run commands on a computer."
+                            }
+                        ],
+                    },
+                    *self.messages,
+                    *screen_contents,
+                    {
+                        "role": "assistant",
+                        "content": [{"text": "Let's think step by step."}],
+                    },
+                ],
+                functions=self.functions,
+            )
+            responses = list(response_stream)[-1]
+            for response in responses:
+                print(format_message(response))
+            self.messages.extend(responses)
+            should_continue = self.execute_function_calls(responses)
+            n = n + 1
