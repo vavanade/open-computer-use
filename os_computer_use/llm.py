@@ -1,4 +1,4 @@
-from qwen_agent.llm import get_chat_model
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
@@ -6,13 +6,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Use OpenRouter to run Qwen-2-VL-72B-Instruct
-qwenvl_config = {
-    "model_type": "qwenvl_oai",
-    "model": "qwen/qwen-2-vl-72b-instruct",
-    "model_server": "https://openrouter.ai/api/v1",
-    "api_key": os.getenv("OPENROUTER_API_KEY"),
+openrouter_config = {
+    "vision_model": "meta-llama/llama-3.2-90b-vision-instruct",
+    "planning_model": "mistralai/mistral-large-2411",
 }
-qwen = get_chat_model(qwenvl_config)
+llama = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
 
 # Use Fireworks to run OS-Atlas-Base-7B
 osatlas_config = {

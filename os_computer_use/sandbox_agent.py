@@ -2,11 +2,13 @@ from os_computer_use.utils import (
     send_bbox_request,
     draw_big_dot,
 )
-from os_computer_use.agent import QwenAgent, format_message
+from os_computer_use.agent import ComputerUseAgent, format_message
+from os_computer_use.llm import openrouter_config
 
 from qwen_agent.llm.schema import ContentItem
 from gradio_client import handle_file
 
+import base64
 import shlex
 import os
 import tempfile
@@ -16,64 +18,103 @@ TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
 
 
-class SandboxAgent(QwenAgent):
+# Function to encode the image
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode("utf-8")
+
+
+class SandboxAgent(ComputerUseAgent):
     functions = [
         {
-            "name": "send_key",
-            "description": "",
-            "parameters": {
-                "name": "name",
-                "type": "string",
-                "description": "Key or combination (e.g. 'Return',  'Ctl-C')",
-                "required": True,
-            },
-        },
-        {
-            "name": "type_text",
-            "description": "",
-            "parameters": {
-                "name": "text",
-                "type": "string",
-                "description": "Text to type",
-                "required": True,
-            },
-        },
-        {
-            "name": "run_command",
-            "description": "",
-            "parameters": {
-                "name": "command",
-                "type": "string",
-                "description": "Shell command",
-                "required": True,
-            },
-        },
-        {
-            "name": "run_background_command",
-            "description": "",
-            "parameters": {
-                "name": "command",
-                "type": "string",
-                "description": "Shell command to run without waiting",
-                "required": True,
-            },
-        },
-        {
-            "name": "click",
-            "description": "",
-            "parameters": [
-                {
-                    "name": "query",
-                    "type": "string",
-                    "description": "Item or UI element on the screen to click",
-                    "required": True,
+            "type": "function",
+            "function": {
+                "name": "send_key",
+                "description": "Send a key or combination of keys to the system.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Key or combination (e.g. 'Return', 'Ctl-C')",
+                        },
+                    },
+                    "required": ["name"],
                 },
-            ],
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "type_text",
+                "description": "Type a specified text into the system.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "type": "string",
+                            "description": "Text to type",
+                        },
+                    },
+                    "required": ["text"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "run_command",
+                "description": "Run a shell command and return the result.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "Shell command to run",
+                        },
+                    },
+                    "required": ["command"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "run_background_command",
+                "description": "Run a shell command in the background.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "Shell command to run without waiting",
+                        },
+                    },
+                    "required": ["command"],
+                },
+            },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "click",
+                "description": "Click on a specified UI element.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "Item or UI element on the screen to click",
+                        },
+                    },
+                    "required": ["query"],
+                },
+            },
         },
     ]
 
-    def __init__(self, qwen, sandbox):
-        super().__init__(qwen)
+    def __init__(self, client, sandbox):
+        super().__init__(client)
         self.sandbox = sandbox
         self.latest_screenshot = None
         self.function_map = {
@@ -104,7 +145,7 @@ class SandboxAgent(QwenAgent):
         filename = self.save_image(file, "screenshot")
         print(f"Image: {filename}")
         self.latest_screenshot = filename
-        return [ContentItem(image=filename)]
+        return encode_image(filename)
 
     def run_command(self, command):
         result = self.sandbox.commands.run(command, timeout=5)
@@ -150,65 +191,76 @@ class SandboxAgent(QwenAgent):
         self.sandbox.commands.run("xdotool click 1")
         return [{"text": "Done."}]
 
-    def append_screenshot(self):
+    def append_screenshot(self, instruction):
         # self.messages.append({"role": "user", "content": self.take_screenshot()})
+        base64_data = self.take_screenshot()
         messages = [
-            *self.messages,
-            {"role": "user", "content": self.take_screenshot()},
+            # *self.messages,
             {
                 "role": "user",
                 "content": [
                     {
-                        "text": "Describe anything you see that might be useful."  # and recommend an action to take (using the keyboard, mouse, or shell commands). Alternatively, you can wait for a couple of seconds."
-                    }
+                        "type": "text",
+                        "text": f"Explain the next best action to take in order to complete the instructions: {instruction}\nYou can click, type, use keyboard commands and run shell commands. Be concise.",
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{base64_data}"},
+                    },
                 ],
             },
         ]
-        # print(messages)
-        response_stream = self.qwen.chat(messages=messages)
-        new_messages = list(response_stream)[-1]
-        # print(new_messages)
-        for response in new_messages:
-            print(format_message(response))
-        return new_messages
-        # self.messages.extend(new_messages)
+        completion = self.client.chat.completions.create(
+            model=openrouter_config["vision_model"], messages=messages
+        )
+        return completion.choices[0].message.content
 
     def run(self, instruction):
 
-        self.messages.extend(
-            [
-                {"role": "user", "content": [{"text": instruction}]},
-            ]
-        )
+        self.messages.append({"role": "user", "content": instruction})
 
-        responses = []
         should_continue = True
-        n = 1
 
         while should_continue:
-            screen_contents = self.append_screenshot()
-            response_stream = self.qwen.chat(
-                messages=[
-                    {
-                        "role": "system",
-                        "content": [
-                            {
-                                "text": "You are an AI assistant with the ability to click, type and run commands on a computer."
-                            }
-                        ],
-                    },
-                    *self.messages,
-                    *screen_contents,
+            screen_contents = self.append_screenshot(instruction)
+            print(f"ASSISTANT: {screen_contents}")
+
+            messages = [
+                {
+                    "role": "system",
+                    "content": "You are an AI assistant with the ability to click, type and run commands on a computer.",
+                },
+                *self.messages,
+                {
+                    "role": "assistant",
+                    "content": screen_contents,
+                },
+                {
+                    "role": "assistant",
+                    "content": "I will now perform the next step.",
+                },
+            ]
+            completion = self.client.chat.completions.create(
+                model=openrouter_config["planning_model"],
+                messages=messages,
+                tools=self.functions,
+            )
+            content = completion.choices[0].message.content
+            if content:
+                print(f"ASSISTANT: {content}")
+                self.messages.append(
                     {
                         "role": "assistant",
-                        "content": [{"text": "Let's think step by step."}],
-                    },
-                ],
-                functions=self.functions,
-            )
-            responses = list(response_stream)[-1]
-            for response in responses:
-                print(format_message(response))
-            self.messages.extend(responses)
-            should_continue = self.execute_function_calls(responses)
-            n = n + 1
+                        "content": content,
+                    }
+                )
+
+            tool_calls = completion.choices[0].message.tool_calls or []
+            should_continue = False
+            for tool_call in tool_calls:
+                should_continue = True
+                self.messages.append(tool_call.function)
+                print(tool_call.function)
+                func_rsp = self.call_function(tool_call.function)
+                self.messages.append(func_rsp)
+                print(func_rsp)
