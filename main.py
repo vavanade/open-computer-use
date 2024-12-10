@@ -1,6 +1,6 @@
 from os_computer_use.streaming import Sandbox, DisplayClient
 from os_computer_use.sandbox_agent import SandboxAgent
-from os_computer_use.llm import qwen
+from os_computer_use.llm import llama
 import asyncio
 
 
@@ -18,7 +18,7 @@ async def start():
         print("Starting the display client...")
         await client.start_display_client(stream_url)
 
-        agent = SandboxAgent(qwen, sandbox)
+        agent = SandboxAgent(llama, sandbox)
         while True:
             try:
                 user_input = input("USER: ")
