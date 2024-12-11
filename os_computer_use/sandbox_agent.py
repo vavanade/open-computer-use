@@ -111,6 +111,18 @@ class SandboxAgent(ComputerUseAgent):
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "finished",
+                "description": "Indicate that the task has been completed.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": [],
+                },
+            },
+        },
     ]
 
     def __init__(self, sandbox):
@@ -195,17 +207,30 @@ class SandboxAgent(ComputerUseAgent):
         # self.messages.append({"role": "user", "content": self.take_screenshot()})
         base64_data = self.take_screenshot()
         messages = [
-            # *self.messages,
+            *self.messages,
             {
                 "role": "user",
                 "content": [
+                    {"type": "text", "text": instruction},
                     {
                         "type": "text",
-                        "text": f"Explain the next best action to take in order to complete the object: {instruction}\nOr, if the objective is accomplished, take no action.\nYou can click, type, use keyboard commands and run shell commands. Be concise.",
+                        "text": f"Explain the next best action to take in order to complete the objective.",
+                    },
+                    {
+                        "type": "text",
+                        "text": "Use this screenshot to decide what to do:",
                     },
                     {
                         "type": "image_url",
                         "image_url": {"url": f"data:image/jpeg;base64,{base64_data}"},
+                    },
+                    {
+                        "type": "text",
+                        "text": "You can click, type, use keyboard commands and run shell commands. Be concise.",
+                    },
+                    {
+                        "type": "text",
+                        "text": "If the objective appears to be complete, then simply use the finished command.",
                     },
                 ],
             },
@@ -228,7 +253,7 @@ class SandboxAgent(ComputerUseAgent):
             messages = [
                 {
                     "role": "system",
-                    "content": "You are an AI assistant with the ability to click, type and run commands on a computer.",
+                    "content": "You are an AI assistant with computer use abilities.",
                 },
                 *self.messages,
                 {
@@ -237,7 +262,7 @@ class SandboxAgent(ComputerUseAgent):
                 },
                 {
                     "role": "assistant",
-                    "content": "If the objective is not accomplished, I will now perform the next step, otherwise I will do nothing.",
+                    "content": "I will now perform the next step.",
                 },
             ]
             completion = fireworks.client.ChatCompletion.create(
@@ -256,7 +281,11 @@ class SandboxAgent(ComputerUseAgent):
             tool_calls = completion.choices[0].message.tool_calls or []
             should_continue = False
             for tool_call in tool_calls:
-                should_continue = True
+                if tool_call.function.name == "finished":
+                    should_continue = False
+                    break
+                else:
+                    should_continue = True
                 self.messages.append(
                     {
                         "role": "function",
