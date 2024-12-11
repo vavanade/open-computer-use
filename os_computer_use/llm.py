@@ -1,16 +1,22 @@
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+import fireworks.client
 
 # Load environment variables from .env file
 load_dotenv()
 
+# Use Fireworks to run Llama 3.3
+fireworks.client.api_key = os.getenv("FIREWORKS_API_KEY")
+llama_config = {
+    "model": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+}
+
 # Use OpenRouter to run Qwen-2-VL-72B-Instruct
 openrouter_config = {
     "vision_model": "meta-llama/llama-3.2-90b-vision-instruct",
-    "planning_model": "mistralai/mistral-large-2411",
 }
-llama = OpenAI(
+llama_vision = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )

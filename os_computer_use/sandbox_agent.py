@@ -3,10 +3,10 @@ from os_computer_use.utils import (
     draw_big_dot,
 )
 from os_computer_use.agent import ComputerUseAgent, format_message
-from os_computer_use.llm import openrouter_config
+from os_computer_use.llm import openrouter_config, llama_config, llama_vision
 
-from qwen_agent.llm.schema import ContentItem
 from gradio_client import handle_file
+import fireworks.client
 
 import base64
 import shlex
@@ -113,8 +113,8 @@ class SandboxAgent(ComputerUseAgent):
         },
     ]
 
-    def __init__(self, client, sandbox):
-        super().__init__(client)
+    def __init__(self, sandbox):
+        super().__init__()
         self.sandbox = sandbox
         self.latest_screenshot = None
         self.function_map = {
@@ -151,19 +151,19 @@ class SandboxAgent(ComputerUseAgent):
         result = self.sandbox.commands.run(command, timeout=5)
         stdout, stderr = result.stdout, result.stderr
         if stdout and stderr:
-            return [{"text": stdout + "\n" + stderr}]
+            return stdout + "\n" + stderr
         elif stdout or stderr:
-            return [{"text": stdout + stderr}]
+            return stdout + stderr
         else:
-            return [{"text": "Done."}]
+            return "Done."
 
     def run_background_command(self, command):
         self.sandbox.commands.run(command, background=True)
-        return [{"text": "Done."}]
+        return "Done."
 
     def send_key(self, name):
         self.sandbox.commands.run(f"xdotool key -- {name}")
-        return [{"text": "Done."}]
+        return "Done."
 
     def type_text(self, text):
         def chunks(text, n):
@@ -174,7 +174,7 @@ class SandboxAgent(ComputerUseAgent):
         for chunk in chunks(text, TYPING_GROUP_SIZE):
             cmd = f"xdotool type --delay {TYPING_DELAY_MS} -- {shlex.quote(chunk)}"
             results.append(self.sandbox.commands.run(cmd))
-        return [{"text": "Done."}]
+        return "Done."
 
     def click(self, query):
         self.take_screenshot()
@@ -189,7 +189,7 @@ class SandboxAgent(ComputerUseAgent):
 
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
         self.sandbox.commands.run("xdotool click 1")
-        return [{"text": "Done."}]
+        return "Done."
 
     def append_screenshot(self, instruction):
         # self.messages.append({"role": "user", "content": self.take_screenshot()})
@@ -201,7 +201,7 @@ class SandboxAgent(ComputerUseAgent):
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Explain the next best action to take in order to complete the instructions: {instruction}\nYou can click, type, use keyboard commands and run shell commands. Be concise.",
+                        "text": f"Explain the next best action to take in order to complete the object: {instruction}\nOr, if the objective is accomplished, take no action.\nYou can click, type, use keyboard commands and run shell commands. Be concise.",
                     },
                     {
                         "type": "image_url",
@@ -210,7 +210,7 @@ class SandboxAgent(ComputerUseAgent):
                 ],
             },
         ]
-        completion = self.client.chat.completions.create(
+        completion = llama_vision.chat.completions.create(
             model=openrouter_config["vision_model"], messages=messages
         )
         return completion.choices[0].message.content
@@ -237,13 +237,11 @@ class SandboxAgent(ComputerUseAgent):
                 },
                 {
                     "role": "assistant",
-                    "content": "I will now perform the next step.",
+                    "content": "If the objective is not accomplished, I will now perform the next step, otherwise I will do nothing.",
                 },
             ]
-            completion = self.client.chat.completions.create(
-                model=openrouter_config["planning_model"],
-                messages=messages,
-                tools=self.functions,
+            completion = fireworks.client.ChatCompletion.create(
+                model=llama_config["model"], messages=messages, tools=self.functions
             )
             content = completion.choices[0].message.content
             if content:
@@ -259,7 +257,13 @@ class SandboxAgent(ComputerUseAgent):
             should_continue = False
             for tool_call in tool_calls:
                 should_continue = True
-                self.messages.append(tool_call.function)
+                self.messages.append(
+                    {
+                        "role": "function",
+                        "name": tool_call.function.name,
+                        "content": tool_call.function.arguments,
+                    }
+                )
                 print(tool_call.function)
                 func_rsp = self.call_function(tool_call.function)
                 self.messages.append(func_rsp)

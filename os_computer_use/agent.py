@@ -24,8 +24,7 @@ def format_message(obj):
 class ComputerUseAgent:
     functions = []
 
-    def __init__(self, client):
-        self.client = client
+    def __init__(self):
         self.messages = []
         self.function_map = {}
 
@@ -41,8 +40,6 @@ class ComputerUseAgent:
                 result = func_impl(**func_args) if func_args else func_impl()
                 return function_response(result)
             except Exception as e:
-                return function_response(
-                    [{"text": f"Error executing function: {str(e)}"}]
-                )
+                return function_response(f"Error executing function: {str(e)}")
         else:
-            return function_response([{"text": "Function not implemented."}])
+            return function_response("Function not implemented.")
