@@ -12,6 +12,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 - [git](https://git-scm.com/)
 - [E2B API key](https://e2b.dev/dashboard?tab=keys)
 - [OpenRouter API key](https://openrouter.ai/settings/keys)
+- [Fireworks API key](https://fireworks.ai/account/api-keys)
 
 ### 1. Install the prerequisites
 
@@ -43,6 +44,7 @@ Create a `.env` file in `secure-computer-use` and set the following:
 # Get your API key here - https://e2b.dev/
 E2B_API_KEY="your-e2b-api-key"
 OPENROUTER_API_KEY="your-openrouter-api-key"
+FIREWORKS_API_KEY="your-fireworks-api-key"
 ```
 
 ### 4. Start the web interface
