@@ -22,7 +22,7 @@ def send_bbox_request(image_data, prompt):
         api_name=osatlas_config["api_name"],
     )
     midpoint = extract_bbox_midpoint(result[1])
-    print("BBOX: " + result[2])
+    print("🖼️ bbox " + result[2])
     return midpoint
 
 
