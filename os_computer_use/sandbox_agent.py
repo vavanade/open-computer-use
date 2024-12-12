@@ -155,7 +155,7 @@ class SandboxAgent(ComputerUseAgent):
     def take_screenshot(self):
         file = self.sandbox.take_screenshot()
         filename = self.save_image(file, "screenshot")
-        print(f"Image: {filename}")
+        print(f"🖼️ screenshot {filename})")
         self.latest_screenshot = filename
         return encode_image(filename)
 
@@ -197,7 +197,7 @@ class SandboxAgent(ComputerUseAgent):
         # Save the image with dot instead of displaying
         dot_image = draw_big_dot(original_image, (x, y))
         filepath = self.save_image(dot_image, "location")
-        print(f"Image: {filepath}")
+        print(f"🖼️ click {filepath})")
 
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
         self.sandbox.commands.run("xdotool click 1")
@@ -211,14 +211,13 @@ class SandboxAgent(ComputerUseAgent):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": instruction},
                     {
                         "type": "text",
-                        "text": f"Explain the next best action to take in order to complete the objective.",
+                        "text": f"QUESTION: What is the best next action to take in order to complete the objective?",
                     },
                     {
                         "type": "text",
-                        "text": "Use this screenshot to decide what to do:",
+                        "text": "CONTEXT: Use this screenshot to decide what to do:",
                     },
                     {
                         "type": "image_url",
@@ -242,13 +241,14 @@ class SandboxAgent(ComputerUseAgent):
 
     def run(self, instruction):
 
-        self.messages.append({"role": "user", "content": instruction})
+        self.messages.append({"role": "user", "content": f"OBJECTIVE: {instruction}"})
 
         should_continue = True
 
         while should_continue:
             screen_contents = self.append_screenshot(instruction)
-            print(f"ASSISTANT: {screen_contents}")
+            message = f"CONTEXT: ${screen_contents}"
+            print(message)
 
             messages = [
                 {
@@ -258,11 +258,11 @@ class SandboxAgent(ComputerUseAgent):
                 *self.messages,
                 {
                     "role": "assistant",
-                    "content": screen_contents,
+                    "content": message,
                 },
                 {
                     "role": "assistant",
-                    "content": "I will now perform the next step.",
+                    "content": "I will now use tool calls to take these actions.",
                 },
             ]
             completion = fireworks.client.ChatCompletion.create(
@@ -270,11 +270,12 @@ class SandboxAgent(ComputerUseAgent):
             )
             content = completion.choices[0].message.content
             if content:
-                print(f"ASSISTANT: {content}")
+                message = f"THOUGHT: {content}"
+                print(message)
                 self.messages.append(
                     {
                         "role": "assistant",
-                        "content": content,
+                        "content": message,
                     }
                 )
 
@@ -286,14 +287,20 @@ class SandboxAgent(ComputerUseAgent):
                     break
                 else:
                     should_continue = True
+                message = f"ACTION: {tool_call.function.name} {str(tool_call.function.arguments)}"
+                print(message)
                 self.messages.append(
                     {
-                        "role": "function",
-                        "name": tool_call.function.name,
-                        "content": tool_call.function.arguments,
+                        "role": "assistant",
+                        "content": message,
                     }
                 )
-                print(tool_call.function)
                 func_rsp = self.call_function(tool_call.function)
-                self.messages.append(func_rsp)
-                print(func_rsp)
+                message = f"OBSERVATION: {func_rsp['content']}"
+                print(message)
+                self.messages.append(
+                    {
+                        "role": "assistant",
+                        "content": message,
+                    }
+                )
