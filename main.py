@@ -2,6 +2,15 @@ from os_computer_use.streaming import Sandbox, DisplayClient
 from os_computer_use.sandbox_agent import SandboxAgent
 import asyncio
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure E2B
+os.environ["E2B_API_KEY"] = os.getenv("E2B_API_KEY")
+
 
 async def start():
     sandbox = None
@@ -18,6 +27,7 @@ async def start():
         await client.start_display_client(stream_url)
 
         agent = SandboxAgent(sandbox)
+
         while True:
             try:
                 user_input = input("USER: ")

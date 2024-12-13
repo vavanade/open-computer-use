@@ -1,9 +1,5 @@
 from PIL import ImageDraw
 import re
-from os_computer_use.llm import osatlas_config
-from gradio_client import Client
-
-osatlas = Client(osatlas_config["source"])
 
 
 def draw_big_dot(image, coordinates, color="red", radius=12):
@@ -12,18 +8,6 @@ def draw_big_dot(image, coordinates, color="red", radius=12):
     bounding_box = [x - radius, y - radius, x + radius, y + radius]
     draw.ellipse(bounding_box, fill=color, outline=color)
     return image
-
-
-def send_bbox_request(image_data, prompt):
-    result = osatlas.predict(
-        image=image_data,
-        text_input=prompt + "\nReturn the response in the form of a bbox",
-        model_id=osatlas_config["model"],
-        api_name=osatlas_config["api_name"],
-    )
-    midpoint = extract_bbox_midpoint(result[1])
-    print("🖼️ bbox " + result[2])
-    return midpoint
 
 
 def extract_bbox_midpoint(bbox_response):

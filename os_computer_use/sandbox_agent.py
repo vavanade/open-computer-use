@@ -1,147 +1,56 @@
-from os_computer_use.utils import (
-    send_bbox_request,
-    draw_big_dot,
+from os_computer_use.grounding import draw_big_dot, extract_bbox_midpoint
+from os_computer_use.llm import (
+    call_grounding_model,
+    call_action_model,
+    call_vision_model,
+    Message,
+    Text,
+    Image as Base64Image,
 )
-from os_computer_use.agent import ComputerUseAgent, format_message
-from os_computer_use.llm import openrouter_config, llama_config, llama_vision
 
-from gradio_client import handle_file
-import fireworks.client
-
-import base64
 import shlex
 import os
 import tempfile
 from PIL import Image
+import json
 
 TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
 
-
-# Function to encode the image
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
+tools = {"finished": {"description": "Indicate that the task has been completed."}}
 
 
-class SandboxAgent(ComputerUseAgent):
-    functions = [
-        {
-            "type": "function",
-            "function": {
-                "name": "send_key",
-                "description": "Send a key or combination of keys to the system.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "Key or combination (e.g. 'Return', 'Ctl-C')",
-                        },
-                    },
-                    "required": ["name"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "type_text",
-                "description": "Type a specified text into the system.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "text": {
-                            "type": "string",
-                            "description": "Text to type",
-                        },
-                    },
-                    "required": ["text"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "run_command",
-                "description": "Run a shell command and return the result.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "command": {
-                            "type": "string",
-                            "description": "Shell command to run",
-                        },
-                    },
-                    "required": ["command"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "run_background_command",
-                "description": "Run a shell command in the background.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "command": {
-                            "type": "string",
-                            "description": "Shell command to run without waiting",
-                        },
-                    },
-                    "required": ["command"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "click",
-                "description": "Click on a specified UI element.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "Item or UI element on the screen to click",
-                        },
-                    },
-                    "required": ["query"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "finished",
-                "description": "Indicate that the task has been completed.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {},
-                    "required": [],
-                },
-            },
-        },
-    ]
+class SandboxAgent:
 
     def __init__(self, sandbox):
         super().__init__()
+        self.messages = []
         self.sandbox = sandbox
         self.latest_screenshot = None
-        self.function_map = {
-            "send_key": self.send_key,
-            "type_text": self.type_text,
-            "run_command": self.run_command,
-            "run_background_command": self.run_background_command,
-            "click": self.click,
-        }
-        # Create temporary directory
         self.tmp_dir = tempfile.mkdtemp()
         self.image_counter = 0
 
+    def call_function(self, name, arguments):
+
+        func_impl = getattr(self, name.lower()) if name.lower() in tools else None
+        if func_impl:
+            try:
+                func_args = json.loads(arguments)
+                result = func_impl(**func_args) if func_args else func_impl()
+                return result
+            except Exception as e:
+                return f"Error executing function: {str(e)}"
+        else:
+            return "Function not implemented."
+
+    def tool(description, params):
+        def decorator(func):
+            tools[func.__name__] = {"description": description, "params": params}
+            return func
+
+        return decorator
+
     def save_image(self, image, prefix="image"):
-        """Save image to temporary directory with incrementing counter."""
         self.image_counter += 1
         filename = f"{prefix}_{self.image_counter}.png"
         filepath = os.path.join(self.tmp_dir, filename)
@@ -155,10 +64,15 @@ class SandboxAgent(ComputerUseAgent):
     def take_screenshot(self):
         file = self.sandbox.take_screenshot()
         filename = self.save_image(file, "screenshot")
-        print(f"🖼️ screenshot {filename})")
+        print(f"🖼️ screenshot {filename}")
         self.latest_screenshot = filename
-        return encode_image(filename)
+        with open(filename, "rb") as image_file:
+            return image_file.read()
 
+    @tool(
+        description="Run a shell command and return the result.",
+        params={"name": "Shell command to run"},
+    )
     def run_command(self, command):
         result = self.sandbox.commands.run(command, timeout=5)
         stdout, stderr = result.stdout, result.stderr
@@ -169,14 +83,26 @@ class SandboxAgent(ComputerUseAgent):
         else:
             return "Done."
 
+    @tool(
+        description="Run a shell command in the background.",
+        params={"command": "Shell command to run without waiting"},
+    )
     def run_background_command(self, command):
         self.sandbox.commands.run(command, background=True)
         return "Done."
 
+    @tool(
+        description="Send a key or combination of keys to the system.",
+        params={"command": "Key or combination (e.g. 'Return', 'Ctl-C')"},
+    )
     def send_key(self, name):
         self.sandbox.commands.run(f"xdotool key -- {name}")
         return "Done."
 
+    @tool(
+        description="Type a specified text into the system.",
+        params={"text": "Text to type"},
+    )
     def type_text(self, text):
         def chunks(text, n):
             for i in range(0, len(text), n):
@@ -188,119 +114,84 @@ class SandboxAgent(ComputerUseAgent):
             results.append(self.sandbox.commands.run(cmd))
         return "Done."
 
+    @tool(
+        description="Click on a specified UI element.",
+        params={"query": "Item or UI element on the screen to click"},
+    )
     def click(self, query):
         self.take_screenshot()
-        original_image = Image.open(self.latest_screenshot)
-        image_data = handle_file(self.latest_screenshot)
-        x, y = send_bbox_request(image_data, query)
+        bbox, image_url = call_grounding_model(
+            query + "\nReturn the response in the form of a bbox",
+            self.latest_screenshot,
+        )
+        position = extract_bbox_midpoint(bbox)
+        print(f"🖼️ bbox {image_url}")
 
-        # Save the image with dot instead of displaying
-        dot_image = draw_big_dot(original_image, (x, y))
+        dot_image = draw_big_dot(Image.open(self.latest_screenshot), position)
         filepath = self.save_image(dot_image, "location")
         print(f"🖼️ click {filepath})")
 
+        x, y = position
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
         self.sandbox.commands.run("xdotool click 1")
         return "Done."
 
-    def append_screenshot(self, instruction):
-        # self.messages.append({"role": "user", "content": self.take_screenshot()})
-        base64_data = self.take_screenshot()
-        messages = [
-            *self.messages,
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"QUESTION: What is the best next action to take in order to complete the objective?",
-                    },
-                    {
-                        "type": "text",
-                        "text": "CONTEXT: Use this screenshot to decide what to do:",
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{base64_data}"},
-                    },
-                    {
-                        "type": "text",
-                        "text": "You can click, type, use keyboard commands and run shell commands. Be concise.",
-                    },
-                    {
-                        "type": "text",
-                        "text": "If the objective appears to be complete, then simply use the finished command.",
-                    },
-                ],
-            },
-        ]
-        completion = llama_vision.chat.completions.create(
-            model=openrouter_config["vision_model"], messages=messages
+    def append_screenshot(self):
+        convert_to_content = lambda message: (
+            Base64Image(message) if isinstance(message, bytes) else Text(message)
         )
-        return completion.choices[0].message.content
+        return call_vision_model(
+            [
+                *self.messages,
+                Message(
+                    map(
+                        convert_to_content,
+                        [
+                            "QUESTION: What is the best next action to take in order to complete the objective?",
+                            "CONTEXT: Use this screenshot to decide what to do:",
+                            self.take_screenshot(),
+                            "You can click, type, use keyboard commands and run shell commands. Be concise.",
+                            "If the objective appears to be complete, then simply use the finished command.",
+                        ],
+                    ),
+                    role="user",
+                    log=False,
+                ),
+            ]
+        )
 
     def run(self, instruction):
 
-        self.messages.append({"role": "user", "content": f"OBJECTIVE: {instruction}"})
+        self.messages.append(Message(f"OBJECTIVE: {instruction}", log=False))
 
         should_continue = True
-
         while should_continue:
-            screen_contents = self.append_screenshot(instruction)
-            message = f"CONTEXT: ${screen_contents}"
-            print(message)
 
-            messages = [
-                {
-                    "role": "system",
-                    "content": "You are an AI assistant with computer use abilities.",
-                },
-                *self.messages,
-                {
-                    "role": "assistant",
-                    "content": message,
-                },
-                {
-                    "role": "assistant",
-                    "content": "I will now use tool calls to take these actions.",
-                },
-            ]
-            completion = fireworks.client.ChatCompletion.create(
-                model=llama_config["model"], messages=messages, tools=self.functions
+            content, tool_calls = call_action_model(
+                [
+                    Message(
+                        "You are an AI assistant with computer use abilities.",
+                        role="system",
+                        log=False,
+                    ),
+                    *self.messages,
+                    Message(f"CONTEXT: {self.append_screenshot()}"),
+                    Message(
+                        "I will now use tool calls to take these actions.", log=False
+                    ),
+                ],
+                tools,
             )
-            content = completion.choices[0].message.content
-            if content:
-                message = f"THOUGHT: {content}"
-                print(message)
-                self.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": message,
-                    }
-                )
 
-            tool_calls = completion.choices[0].message.tool_calls or []
+            if content:
+                self.messages.append(Message(f"THOUGHT: {content}"))
+
             should_continue = False
             for tool_call in tool_calls:
-                if tool_call.function.name == "finished":
-                    should_continue = False
-                    break
-                else:
-                    should_continue = True
-                message = f"ACTION: {tool_call.function.name} {str(tool_call.function.arguments)}"
-                print(message)
-                self.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": message,
-                    }
-                )
-                func_rsp = self.call_function(tool_call.function)
-                message = f"OBSERVATION: {func_rsp['content']}"
-                print(message)
-                self.messages.append(
-                    {
-                        "role": "assistant",
-                        "content": message,
-                    }
-                )
+                should_continue = tool_call.function.name != "finished"
+
+                name, arguments = tool_call.function.name, tool_call.function.arguments
+                self.messages.append(Message(f"ACTION: {name} {str(arguments)}"))
+
+                result = self.call_function(name, arguments)
+                self.messages.append(Message(f"OBSERVATION: {result}"))
