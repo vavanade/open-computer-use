@@ -71,7 +71,7 @@ class SandboxAgent:
 
     @tool(
         description="Run a shell command and return the result.",
-        params={"name": "Shell command to run"},
+        params={"command": "Shell command to run"},
     )
     def run_command(self, command):
         result = self.sandbox.commands.run(command, timeout=5)
