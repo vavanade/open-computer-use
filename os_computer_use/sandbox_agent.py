@@ -35,6 +35,10 @@ class SandboxAgent:
         self.latest_screenshot = None
         self.tmp_dir = tempfile.mkdtemp()
         self.image_counter = 0
+        print("The agent will use the following actions:")
+        for action, details in tools.items():
+            param_str = ", ".join(details.get("params").keys())
+            print(f"- {action}({param_str})")
 
     def call_function(self, name, arguments):
 
