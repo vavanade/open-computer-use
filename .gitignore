@@ -1,4 +1,13 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
 
-/.env
+# Environment variables
+.env
+
+# Agent output files
 /output.mp4
 /output.ts
