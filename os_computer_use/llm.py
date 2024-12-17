@@ -24,24 +24,23 @@ def create_llama_function_list(definitions):
         properties = {}
         required = []
 
-        if "params" in details:
-            for param_name, param_desc in details["params"].items():
-                properties[param_name] = {"type": "string", "description": param_desc}
-                required.append(param_name)
+        for param_name, param_desc in details["params"].items():
+            properties[param_name] = {"type": "string", "description": param_desc}
+            required.append(param_name)
 
-            function_def = {
-                "type": "function",
-                "function": {
-                    "name": name,
-                    "description": details["description"],
-                    "parameters": {
-                        "type": "object",
-                        "properties": properties,
-                        "required": required,
-                    },
+        function_def = {
+            "type": "function",
+            "function": {
+                "name": name,
+                "description": details["description"],
+                "parameters": {
+                    "type": "object",
+                    "properties": properties,
+                    "required": required,
                 },
-            }
-            functions.append(function_def)
+            },
+        }
+        functions.append(function_def)
 
     return functions
 
