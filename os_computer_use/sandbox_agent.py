@@ -45,8 +45,7 @@ class SandboxAgent:
         func_impl = getattr(self, name.lower()) if name.lower() in tools else None
         if func_impl:
             try:
-                func_args = json.loads(arguments)
-                result = func_impl(**func_args) if func_args else func_impl()
+                result = func_impl(**arguments) if arguments else func_impl()
                 return result
             except Exception as e:
                 return f"Error executing function: {str(e)}"
@@ -207,10 +206,15 @@ class SandboxAgent:
                 if not should_continue:
                     break
 
-                name, arguments = tool_call.function.name, tool_call.function.arguments
-                self.messages.append(
-                    Message(f"ACTION: {name} {str(arguments)}", color="red")
-                )
+                try:
+                    name = tool_call.function.name
+                    arguments = json.loads(tool_call.function.arguments)
+                    print_colored(f"ACTION: {name} {str(arguments)}", color="red")
+                    # Write the tool-call to the message history using the same format outputted by the model
+                    action = str({"name": name, "parameters": arguments})
+                    self.messages.append(Message(f"ACTION: {action}", log=False))
+                    result = self.call_function(name, arguments)
+                except Exception as e:
+                    result = str(e)
 
-                result = self.call_function(name, arguments)
                 self.messages.append(Message(f"OBSERVATION: {result}", color="yellow"))
