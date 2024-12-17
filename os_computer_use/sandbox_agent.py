@@ -7,6 +7,7 @@ from os_computer_use.llm import (
     Text,
     Image as Base64Image,
 )
+from os_computer_use.utils import print_colored
 
 import shlex
 import os
@@ -64,7 +65,7 @@ class SandboxAgent:
     def take_screenshot(self):
         file = self.sandbox.take_screenshot()
         filename = self.save_image(file, "screenshot")
-        print(f"🖼️ screenshot {filename}")
+        print_colored(f"screenshot {filename}", color="gray")
         self.latest_screenshot = filename
         with open(filename, "rb") as image_file:
             return image_file.read()
@@ -125,11 +126,11 @@ class SandboxAgent:
             self.latest_screenshot,
         )
         position = extract_bbox_midpoint(bbox)
-        print(f"🖼️ bbox {image_url}")
+        print_colored(f"bbox {image_url}", color="gray")
 
         dot_image = draw_big_dot(Image.open(self.latest_screenshot), position)
         filepath = self.save_image(dot_image, "location")
-        print(f"🖼️ click {filepath})")
+        print_colored(f"click {filepath})", color="gray")
 
         x, y = position
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
@@ -175,7 +176,7 @@ class SandboxAgent:
                         log=False,
                     ),
                     *self.messages,
-                    Message(f"CONTEXT: {self.append_screenshot()}"),
+                    Message(f"CONTEXT: {self.append_screenshot()}", color="green"),
                     Message(
                         "I will now use tool calls to take these actions.", log=False
                     ),
@@ -184,14 +185,16 @@ class SandboxAgent:
             )
 
             if content:
-                self.messages.append(Message(f"THOUGHT: {content}"))
+                self.messages.append(Message(f"THOUGHT: {content}", color="blue"))
 
             should_continue = False
             for tool_call in tool_calls:
                 should_continue = tool_call.function.name != "finished"
 
                 name, arguments = tool_call.function.name, tool_call.function.arguments
-                self.messages.append(Message(f"ACTION: {name} {str(arguments)}"))
+                self.messages.append(
+                    Message(f"ACTION: {name} {str(arguments)}", color="red")
+                )
 
                 result = self.call_function(name, arguments)
-                self.messages.append(Message(f"OBSERVATION: {result}"))
+                self.messages.append(Message(f"OBSERVATION: {result}", color="yellow"))

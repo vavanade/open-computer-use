@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import fireworks.client
 from gradio_client import Client, handle_file
 import base64
+from os_computer_use.utils import print_colored
 
 # Load environment variables from .env file
 load_dotenv()
@@ -82,9 +83,9 @@ def call_grounding_model(prompt, image_data):
     return result[1], result[2]
 
 
-def Message(content, role="assistant", log=True):
+def Message(content, role="assistant", log=True, color=None):
     if log:
-        print(content)
+        print_colored(content, color)
     return {"role": role, "content": content}
 
 
