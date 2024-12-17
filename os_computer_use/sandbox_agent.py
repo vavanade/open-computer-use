@@ -93,7 +93,7 @@ class SandboxAgent:
 
     @tool(
         description="Send a key or combination of keys to the system.",
-        params={"command": "Key or combination (e.g. 'Return', 'Ctl-C')"},
+        params={"name": "Key or combination (e.g. 'Return', 'Ctl-C')"},
     )
     def send_key(self, name):
         self.sandbox.commands.run(f"xdotool key -- {name}")
