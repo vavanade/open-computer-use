@@ -52,6 +52,10 @@ FIREWORKS_API_KEY="your-fireworks-api-key"
 Run the following command to start the agent:
 
 ```sh
+poetry install
+```
+
+```sh
 poetry run start
 ```
 
