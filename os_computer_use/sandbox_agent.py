@@ -18,7 +18,12 @@ import json
 TYPING_DELAY_MS = 12
 TYPING_GROUP_SIZE = 50
 
-tools = {"finished": {"description": "Indicate that the task has been completed."}}
+tools = {
+    "stop": {
+        "description": "Indicate that the task has been completed.",
+        "params": {},
+    }
+}
 
 
 class SandboxAgent:
@@ -152,7 +157,8 @@ class SandboxAgent:
                             "CONTEXT: Use this screenshot to decide what to do:",
                             self.take_screenshot(),
                             "You can click, type, use keyboard commands and run shell commands. Be concise.",
-                            "If the objective appears to be complete, then simply use the finished command.",
+                            "If the objective appears to be complete, then simply state the the objective is complete.",
+                            "DECISION:",
                         ],
                     ),
                     role="user",
@@ -178,7 +184,8 @@ class SandboxAgent:
                     *self.messages,
                     Message(f"CONTEXT: {self.append_screenshot()}", color="green"),
                     Message(
-                        "I will now use tool calls to take these actions.", log=False
+                        "I will now use tool calls to take these actions, or use the stop command if the objective is complete.",
+                        log=False,
                     ),
                 ],
                 tools,
@@ -189,7 +196,9 @@ class SandboxAgent:
 
             should_continue = False
             for tool_call in tool_calls:
-                should_continue = tool_call.function.name != "finished"
+                should_continue = tool_call.function.name != "stop"
+                if not should_continue:
+                    break
 
                 name, arguments = tool_call.function.name, tool_call.function.arguments
                 self.messages.append(
