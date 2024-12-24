@@ -176,6 +176,8 @@ class SandboxAgent:
 
         should_continue = True
         while should_continue:
+            # Stop the sandbox from timing out
+            self.sandbox.set_timeout(60)
 
             content, tool_calls = call_action_model(
                 [
