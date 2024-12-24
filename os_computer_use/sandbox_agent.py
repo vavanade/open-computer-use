@@ -202,19 +202,14 @@ class SandboxAgent:
 
             should_continue = False
             for tool_call in tool_calls:
-                should_continue = tool_call.function.name != "stop"
+                name, parameters = tool_call.get("name"), tool_call.get("parameters")
+                should_continue = name != "stop"
                 if not should_continue:
                     break
-
-                try:
-                    name = tool_call.function.name
-                    arguments = json.loads(tool_call.function.arguments)
-                    print_colored(f"ACTION: {name} {str(arguments)}", color="red")
-                    # Write the tool-call to the message history using the same format outputted by the model
-                    action = str({"name": name, "parameters": arguments})
-                    self.messages.append(Message(f"ACTION: {action}", log=False))
-                    result = self.call_function(name, arguments)
-                except Exception as e:
-                    result = str(e)
+                # Print the tool-call in an easily readable format
+                print_colored(f"ACTION: {name} {str(parameters)}", color="red")
+                # Write the tool-call to the message history using the same format used by the model
+                self.messages.append(Message(json.dumps(tool_call), log=False))
+                result = self.call_function(name, parameters)
 
                 self.messages.append(Message(f"OBSERVATION: {result}", color="yellow"))
