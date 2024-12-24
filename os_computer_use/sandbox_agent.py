@@ -81,7 +81,7 @@ class SandboxAgent:
 
     @tool(
         description="Run a shell command and return the result.",
-        params={"command": "Shell command to run"},
+        params={"command": "Shell command to run synchronously"},
     )
     def run_command(self, command):
         result = self.sandbox.commands.run(command, timeout=5)
@@ -91,15 +91,15 @@ class SandboxAgent:
         elif stdout or stderr:
             return stdout + stderr
         else:
-            return "Done."
+            return "The command finished running."
 
     @tool(
         description="Run a shell command in the background.",
-        params={"command": "Shell command to run without waiting"},
+        params={"command": "Shell command to run asynchronously"},
     )
     def run_background_command(self, command):
         self.sandbox.commands.run(command, background=True)
-        return "Done."
+        return "The command has been started."
 
     @tool(
         description="Send a key or combination of keys to the system.",
@@ -107,7 +107,7 @@ class SandboxAgent:
     )
     def send_key(self, name):
         self.sandbox.commands.run(f"xdotool key -- {name}")
-        return "Done."
+        return "The key has been pressed."
 
     @tool(
         description="Type a specified text into the system.",
@@ -122,7 +122,7 @@ class SandboxAgent:
         for chunk in chunks(text, TYPING_GROUP_SIZE):
             cmd = f"xdotool type --delay {TYPING_DELAY_MS} -- {shlex.quote(chunk)}"
             results.append(self.sandbox.commands.run(cmd))
-        return "Done."
+        return "The text has been typed."
 
     @tool(
         description="Click on a specified UI element.",
@@ -144,7 +144,7 @@ class SandboxAgent:
         x, y = position
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
         self.sandbox.commands.run("xdotool click 1")
-        return "Done."
+        return "The mouse has been clicked."
 
     def append_screenshot(self):
         convert_to_content = lambda message: (
