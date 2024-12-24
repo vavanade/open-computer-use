@@ -157,12 +157,13 @@ class SandboxAgent:
                     map(
                         convert_to_content,
                         [
-                            "QUESTION: What is the best next action to take in order to complete the objective?",
-                            "CONTEXT: Use this screenshot to decide what to do:",
                             self.take_screenshot(),
-                            "You can click, type, use keyboard commands and run shell commands. Be concise.",
-                            "If the objective appears to be complete, then simply state the the objective is complete.",
-                            "DECISION:",
+                            "This image shows the current display of the computer. Please respond in the following format:\n"
+                            "The objective is: [put the objective here]\n"
+                            "On the screen, I see: [an extensive list of everything that might be relevant to the objective including windows, icons, menus, apps, and UI elements]\n"
+                            "This means the objective is: [complete|not complete]\n\n"
+                            "(Only continue if the objective is not complete.)\n"
+                            "The next step is to [click|type|run the shell command] [put the next single step here] in order to [put what you expect to happen here].",
                         ],
                     ),
                     role="user",
@@ -188,7 +189,7 @@ class SandboxAgent:
                         log=False,
                     ),
                     *self.messages,
-                    Message(f"CONTEXT: {self.append_screenshot()}", color="green"),
+                    Message(f"THOUGHT: {self.append_screenshot()}", color="green"),
                     Message(
                         "I will now use tool calls to take these actions, or use the stop command if the objective is complete.",
                         log=False,
