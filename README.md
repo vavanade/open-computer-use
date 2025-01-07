@@ -4,6 +4,21 @@ A secure cloud Linux computer powered by [E2B Desktop Sandbox](https://github.co
 
 https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 
+## Features
+
+- Uses [Llama 3.2](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_2), [3.3](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_3/) and [OS-Atlas](https://osatlas.github.io/)
+- Operates the computer via a combination of keyboard, mouse, and shell commands
+- Live streams the display of the sandbox on the client computer
+- The user can pause the agent and provide feedback and any time
+- Designed to work on any operating system or platform
+- Supports multiple inference providers, including Hugging Face, Fireworks, OpenRouter and Llama AI
+
+## Design
+
+![Open Source Computer Use Architecture](https://github.com/user-attachments/assets/3769808f-4a3d-422d-86ec-e6ebc1cc4513)
+
+The details of the design are laid out in this article: [How I taught an AI to use a computer](https://blog.jamesmurdza.com/how-i-taught-an-ai-to-use-a-computer)
+
 ## Get started
 
 ### Prerequisites
