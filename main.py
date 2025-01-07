@@ -13,12 +13,12 @@ load_dotenv()
 os.environ["E2B_API_KEY"] = os.getenv("E2B_API_KEY")
 
 
-async def start(user_input=None):
+async def start(user_input=None, output_dir=None):
     sandbox = None
     client = None
     try:
         sandbox = Sandbox()
-        client = DisplayClient()
+        client = DisplayClient(output_dir)
 
         print("Starting the display server...")
         stream_url = sandbox.start_stream()
@@ -67,10 +67,19 @@ async def start(user_input=None):
                 print(f"Error saving stream: {str(e)}")
 
 
+def initialize_output_directory(directory_format):
+    run_id = 1
+    while os.path.exists(directory_format(run_id)):
+        run_id += 1
+    os.makedirs(directory_format(run_id), exist_ok=True)
+    return directory_format(run_id)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--prompt", type=str, help="User prompt for the agent")
     args = parser.parse_args()
 
+    output_dir = initialize_output_directory(lambda id: f"./output/run_{id}")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(start(user_input=args.prompt))
+    loop.run_until_complete(start(user_input=args.prompt, output_dir=output_dir))

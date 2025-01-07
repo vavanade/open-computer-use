@@ -9,5 +9,4 @@ __pycache__/
 .env
 
 # Agent output files
-/output.mp4
-/output.ts
+/output

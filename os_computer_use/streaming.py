@@ -22,13 +22,15 @@ class Sandbox(SandboxBase):
 
 
 class DisplayClient:
-    def __init__(self):
+    def __init__(self, output_dir="."):
         self.process = None
+        self.output_stream = f"{output_dir}/output.ts"
+        self.output_file = f"{output_dir}/output.mp4"
 
     async def start_display_client(self, stream_url):
         self.process = await asyncio.create_subprocess_shell(
             f"ffmpeg -reconnect 1 -i {stream_url} -c:v libx264 -preset fast -crf 23 "
-            f"-c:a aac -b:a 128k -f mpegts -loglevel quiet - | tee output.ts | "
+            f"-c:a aac -b:a 128k -f mpegts -loglevel quiet - | tee {self.output_stream} | "
             f"ffplay -autoexit -i -loglevel quiet -",
             preexec_fn=os.setsid,
             stdin=asyncio.subprocess.DEVNULL,
@@ -43,15 +45,12 @@ class DisplayClient:
             await self.process.wait()
 
     async def save_stream(self):
-        if os.path.exists("output.mp4"):
-            os.remove("output.mp4")
-
         process = await asyncio.create_subprocess_shell(
-            "ffmpeg -i output.ts -c:v copy -c:a copy -loglevel quiet output.mp4"
+            f"ffmpeg -i {self.output_stream} -c:v copy -c:a copy -loglevel quiet {self.output_file}"
         )
         await process.wait()
 
         if process.returncode == 0:
-            print("Stream saved successfully as mp4.")
+            print(f"Stream saved successfully as {self.output_file}.")
         else:
-            print("Failed to save the stream as mp4.")
+            print(f"Failed to save the stream as {self.output_file}.")
