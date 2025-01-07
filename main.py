@@ -1,6 +1,7 @@
 from os_computer_use.streaming import Sandbox, DisplayClient
 from os_computer_use.sandbox_agent import SandboxAgent
 import asyncio
+import argparse
 
 import os
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ load_dotenv()
 os.environ["E2B_API_KEY"] = os.getenv("E2B_API_KEY")
 
 
-async def start():
+async def start(user_input=None):
     sandbox = None
     client = None
     try:
@@ -30,8 +31,10 @@ async def start():
 
         while True:
             try:
-                user_input = input("USER: ")
+                if user_input is None:
+                    user_input = input("USER: ")
                 agent.run(user_input)
+                user_input = None
 
             except KeyboardInterrupt:
                 print("\nExit key pressed.")
@@ -61,4 +64,8 @@ async def start():
 
 
 def main():
-    asyncio.run(start())
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--prompt", type=str, help="User prompt for the agent")
+    args = parser.parse_args()
+
+    asyncio.run(start(user_input=args.prompt))
