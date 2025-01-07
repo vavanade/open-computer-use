@@ -30,15 +30,19 @@ async def start(user_input=None):
         agent = SandboxAgent(sandbox)
 
         while True:
-            try:
-                if user_input is None:
+            # Ask for user input, and exit if the user presses ctl-c
+            if user_input is None:
+                try:
                     user_input = input("USER: ")
-                agent.run(user_input)
-                user_input = None
-
-            except KeyboardInterrupt:
-                print("\nExit key pressed.")
-                break
+                except KeyboardInterrupt:
+                    break
+            # Run the agent, and go back to the prompt if the user presses ctl-c
+            else:
+                try:
+                    agent.run(user_input)
+                    user_input = None
+                except KeyboardInterrupt:
+                    user_input = None
 
     finally:
         if client:
@@ -68,4 +72,5 @@ def main():
     parser.add_argument("--prompt", type=str, help="User prompt for the agent")
     args = parser.parse_args()
 
-    asyncio.run(start(user_input=args.prompt))
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(start(user_input=args.prompt))
