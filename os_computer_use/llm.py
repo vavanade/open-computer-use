@@ -3,7 +3,6 @@ import os
 from dotenv import load_dotenv
 from gradio_client import Client, handle_file
 import base64
-from os_computer_use.utils import print_colored
 import json
 import re
 
@@ -110,9 +109,7 @@ def call_grounding_model(prompt, image_data):
     return result[1], result[2]
 
 
-def Message(content, role="assistant", log=True, color=None):
-    if log:
-        print_colored(content, color)
+def Message(content, role="assistant"):
     return {"role": role, "content": content}
 
 

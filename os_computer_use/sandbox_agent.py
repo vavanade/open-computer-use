@@ -7,7 +7,7 @@ from os_computer_use.llm import (
     Text,
     Image as Base64Image,
 )
-from os_computer_use.utils import print_colored
+from os_computer_use.utils import print_colored, write_log_file
 
 import shlex
 import os
@@ -28,17 +28,30 @@ tools = {
 
 class SandboxAgent:
 
-    def __init__(self, sandbox):
+    def __init__(self, sandbox, output_dir="."):
         super().__init__()
-        self.messages = []
-        self.sandbox = sandbox
-        self.latest_screenshot = None
-        self.tmp_dir = tempfile.mkdtemp()
-        self.image_counter = 0
+        self.messages = []  # Agent memory
+        self.sandbox = sandbox  # E2B sandbox
+        self.latest_screenshot = None  # Most recent PNG of the scren
+        self.image_counter = 0  # Current screenshot number
+        self.tmp_dir = tempfile.mkdtemp()  # Folder to store screenshots
+        self.logs = []  # Output logs
+        self.log_file = f"{output_dir}/log.html"  # Output log file
+
         print("The agent will use the following actions:")
         for action, details in tools.items():
             param_str = ", ".join(details.get("params").keys())
             print(f"- {action}({param_str})")
+
+    # Write a line to the log file and terminal
+    def log(self, text, color="black", print=True):
+        # Write to the terminal
+        if print:
+            print_colored(text, color)
+        # Write to the log file
+        self.logs.append({"text": text, "color": color})
+        write_log_file(self.logs, self.log_file)
+        return text
 
     def call_function(self, name, arguments):
 
@@ -73,7 +86,7 @@ class SandboxAgent:
     def take_screenshot(self):
         file = self.sandbox.take_screenshot()
         filename = self.save_image(file, "screenshot")
-        print_colored(f"screenshot {filename}", color="gray")
+        self.log(f"screenshot {filename}", "gray")
         self.latest_screenshot = filename
         with open(filename, "rb") as image_file:
             return image_file.read()
@@ -134,11 +147,11 @@ class SandboxAgent:
             self.latest_screenshot,
         )
         position = extract_bbox_midpoint(bbox)
-        print_colored(f"bbox {image_url}", color="gray")
+        self.log(f"bbox {image_url}", "gray")
 
         dot_image = draw_big_dot(Image.open(self.latest_screenshot), position)
         filepath = self.save_image(dot_image, "location")
-        print_colored(f"click {filepath})", color="gray")
+        self.log(f"click {filepath})", "gray")
 
         x, y = position
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
@@ -166,14 +179,14 @@ class SandboxAgent:
                         ],
                     ),
                     role="user",
-                    log=False,
                 ),
             ]
         )
 
     def run(self, instruction):
 
-        self.messages.append(Message(f"OBJECTIVE: {instruction}", log=False))
+        self.messages.append(Message(f"OBJECTIVE: {instruction}"))
+        self.log(f"USER: {instruction}", print=False)
 
         should_continue = True
         while should_continue:
@@ -185,20 +198,18 @@ class SandboxAgent:
                     Message(
                         "You are an AI assistant with computer use abilities.",
                         role="system",
-                        log=False,
                     ),
                     *self.messages,
-                    Message(f"THOUGHT: {self.append_screenshot()}", color="green"),
+                    Message(self.log(f"THOUGHT: {self.append_screenshot()}", "green")),
                     Message(
                         "I will now use tool calls to take these actions, or use the stop command if the objective is complete.",
-                        log=False,
                     ),
                 ],
                 tools,
             )
 
             if content:
-                self.messages.append(Message(f"THOUGHT: {content}", color="blue"))
+                self.messages.append(Message(self.log(f"THOUGHT: {content}", "blue")))
 
             should_continue = False
             for tool_call in tool_calls:
@@ -207,9 +218,11 @@ class SandboxAgent:
                 if not should_continue:
                     break
                 # Print the tool-call in an easily readable format
-                print_colored(f"ACTION: {name} {str(parameters)}", color="red")
+                self.log(f"ACTION: {name} {str(parameters)}", "red")
                 # Write the tool-call to the message history using the same format used by the model
-                self.messages.append(Message(json.dumps(tool_call), log=False))
+                self.messages.append(Message(json.dumps(tool_call)))
                 result = self.call_function(name, parameters)
 
-                self.messages.append(Message(f"OBSERVATION: {result}", color="yellow"))
+                self.messages.append(
+                    Message(self.log(f"OBSERVATION: {result}", "yellow"))
+                )

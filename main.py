@@ -27,7 +27,7 @@ async def start(user_input=None, output_dir=None):
         print("Starting the display client...")
         await client.start_display_client(stream_url)
 
-        agent = SandboxAgent(sandbox)
+        agent = SandboxAgent(sandbox, output_dir)
 
         while True:
             # Ask for user input, and exit if the user presses ctl-c
