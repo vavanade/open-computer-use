@@ -1,4 +1,4 @@
-# Open Source Computer Use by E2B
+# Open Source Computer Use
 
 A secure cloud Linux computer powered by [E2B Desktop Sandbox](https://github.com/e2b-dev/desktop/) and controlled by open-source LLMs.
 
