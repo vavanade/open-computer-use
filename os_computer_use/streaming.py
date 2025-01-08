@@ -27,11 +27,11 @@ class DisplayClient:
         self.output_stream = f"{output_dir}/output.ts"
         self.output_file = f"{output_dir}/output.mp4"
 
-    async def start_display_client(self, stream_url):
+    async def start_display_client(self, stream_url, title="Sandbox"):
         self.process = await asyncio.create_subprocess_shell(
             f"ffmpeg -reconnect 1 -i {stream_url} -c:v libx264 -preset fast -crf 23 "
             f"-c:a aac -b:a 128k -f mpegts -loglevel quiet - | tee {self.output_stream} | "
-            f"ffplay -autoexit -i -loglevel quiet -",
+            f"ffplay -autoexit -i -loglevel quiet -window_title '{title.replace("'", "\\'")}' -",
             preexec_fn=os.setsid,
             stdin=asyncio.subprocess.DEVNULL,
         )

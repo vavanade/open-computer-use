@@ -25,7 +25,7 @@ async def start(user_input=None, output_dir=None):
         await asyncio.sleep(2.5)
 
         print("Starting the display client...")
-        await client.start_display_client(stream_url)
+        await client.start_display_client(stream_url, user_input or "Sandbox")
 
         agent = SandboxAgent(sandbox, output_dir)
 
