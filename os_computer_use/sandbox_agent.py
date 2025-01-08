@@ -136,11 +136,8 @@ class SandboxAgent:
             results.append(self.sandbox.commands.run(cmd))
         return "The text has been typed."
 
-    @tool(
-        description="Click on a specified UI element.",
-        params={"query": "Item or UI element on the screen to click"},
-    )
-    def click(self, query):
+    def click_element(self, query, click_command, action_name="click"):
+        """Base method for all click operations"""
         self.take_screenshot()
         bbox, image_url = call_grounding_model(
             query + "\nReturn the response in the form of a bbox",
@@ -151,12 +148,33 @@ class SandboxAgent:
 
         dot_image = draw_big_dot(Image.open(self.latest_screenshot), position)
         filepath = self.save_image(dot_image, "location")
-        self.log(f"click {filepath})", "gray")
+        self.log(f"{action_name} {filepath})", "gray")
 
         x, y = position
         self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
-        self.sandbox.commands.run("xdotool click 1")
-        return "The mouse has been clicked."
+        self.sandbox.commands.run(click_command)
+        return f"The mouse has {action_name}ed."
+
+    @tool(
+        description="Click on a specified UI element.",
+        params={"query": "Item or UI element on the screen to click"},
+    )
+    def click(self, query):
+        return self.click_element(query, "xdotool click 1")
+
+    @tool(
+        description="Double click on a specified UI element.",
+        params={"query": "Item or UI element on the screen to double click"},
+    )
+    def double_click(self, query):
+        return self.click_element(query, "xdotool click --repeat 2 1", "double click")
+
+    @tool(
+        description="Right click on a specified UI element.",
+        params={"query": "Item or UI element on the screen to right click"},
+    )
+    def right_click(self, query):
+        return self.click_element(query, "xdotool click 3", "right click")
 
     def append_screenshot(self):
         convert_to_content = lambda message: (
