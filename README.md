@@ -41,7 +41,7 @@ brew install poetry ffmpeg
 In your terminal:
 
 ```sh
-git clone https://github.com/e2b-dev/secure-computer-use/
+git clone https://github.com/e2b-dev/open-computer-use/
 ```
 
 ### 3. Set the environment variables
@@ -49,10 +49,10 @@ git clone https://github.com/e2b-dev/secure-computer-use/
 Enter the project directory:
 
 ```
-cd secure-computer-use
+cd open-computer-use
 ```
 
-Create a `.env` file in `secure-computer-use` and set the following:
+Create a `.env` file in `open-computer-use` and set the following:
 
 ```sh
 # Get your API key here - https://e2b.dev/
