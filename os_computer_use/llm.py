@@ -74,7 +74,16 @@ else:
 
 # Use Llama 3.2 as the vision model
 def call_vision_model(messages):
-    return llama32_complete(messages).choices[0].message.content
+    completion = llama32_complete(messages)
+    if hasattr(completion, "error"):
+        raise Exception(
+            "Error calling Llama 3.2 vision model: {}".format(completion.error)
+        )
+    if not completion.choices:
+        raise ValueError(
+            "Invalid response from Llama 3.2 vision model: {}".format(completion)
+        )
+    return completion.choices[0].message.content
 
 
 # Establish the Llama 3.3 provider
@@ -106,6 +115,14 @@ else:
 # Use Llama 3.3 as the action model
 def call_action_model(messages, functions):
     completion = llama33_complete(messages, tools=create_llama_function_list(functions))
+    if hasattr(completion, "error"):
+        raise Exception(
+            "Error calling Llama 3.3 action model: {}".format(completion.error)
+        )
+    if not completion.choices:
+        raise ValueError(
+            "Invalid response from Llama 3.3 action model: {}".format(completion)
+        )
     return parse_llama_tool_calls(
         completion.choices[0].message.content,
         completion.choices[0].message.tool_calls or [],
