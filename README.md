@@ -26,7 +26,9 @@ The details of the design are laid out in this article: [How I taught an AI to u
 - Python 3.10 or later
 - [git](https://git-scm.com/)
 - [E2B API key](https://e2b.dev/dashboard?tab=keys)
-- [Llama API key](https://console.llamaapi.com/)
+- LLM API keys:
+    - Option 1: [OpenRouter API key](https://openrouter.ai/settings/keys) + [Fireworks API key](https://fireworks.ai/account/api-keys)
+    - Option 2: [Llama API key](https://console.llamaapi.com/)
 
 ### 1. Install the prerequisites
 
@@ -58,6 +60,15 @@ Create a `.env` file in `open-computer-use` and set the following:
 # Get your API key here - https://e2b.dev/
 E2B_API_KEY="your-e2b-api-key"
 LLAMA_API_KEY="your-llama-api-key"
+```
+
+or
+
+```sh
+# Get your API key here - https://e2b.dev/
+E2B_API_KEY="your-e2b-api-key"
+OPENROUTER_API_KEY="your-openrouter-api-key"
+FIREWORKS_API_KEY="your-fireworks-api-key"
 ```
 
 ### 4. Start the web interface
