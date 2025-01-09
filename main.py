@@ -22,10 +22,10 @@ async def start(user_input=None, output_dir=None):
 
         print("Starting the display server...")
         stream_url = sandbox.start_stream()
-        await asyncio.sleep(2.5)
 
-        print("Starting the display client...")
-        await client.start_display_client(stream_url, user_input or "Sandbox")
+        print("(The display client will start in five seconds.)")
+        # If the display client is opened before the stream is ready, it will close immediately
+        await client.start_display_client(stream_url, user_input or "Sandbox", delay=5)
 
         agent = SandboxAgent(sandbox, output_dir)
 
