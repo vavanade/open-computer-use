@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 - Live streams the display of the sandbox on the client computer
 - The user can pause the agent and provide feedback and any time
 - Designed to work on any operating system or platform
-- Supports multiple inference providers, including Hugging Face, Fireworks, OpenRouter and Llama AI
+- Supports a number of inference providers, including Hugging Face, Fireworks, OpenRouter, etc.
 
 ## Design
 
@@ -27,9 +27,7 @@ The details of the design are laid out in this article: [How I taught an AI to u
 - Python 3.10 or later
 - [git](https://git-scm.com/)
 - [E2B API key](https://e2b.dev/dashboard?tab=keys)
-- LLM API keys:
-    - Option 1: [OpenRouter API key](https://openrouter.ai/settings/keys) + [Fireworks API key](https://fireworks.ai/account/api-keys)
-    - Option 2: [Llama API key](https://console.llamaapi.com/)
+- [Fireworks API key](https://fireworks.ai/account/api-keys)
 
 ### 1. Install the prerequisites
 
@@ -60,15 +58,6 @@ Create a `.env` file in `open-computer-use` and set the following:
 ```sh
 # Get your API key here - https://e2b.dev/
 E2B_API_KEY="your-e2b-api-key"
-LLAMA_API_KEY="your-llama-api-key"
-```
-
-or
-
-```sh
-# Get your API key here - https://e2b.dev/
-E2B_API_KEY="your-e2b-api-key"
-OPENROUTER_API_KEY="your-openrouter-api-key"
 FIREWORKS_API_KEY="your-fireworks-api-key"
 ```
 
@@ -85,3 +74,16 @@ poetry run start
 ```
 
 The agent will start and prompt you for its first instruction.
+
+## LLM support
+
+Open Computer Use supports a variety of LLMs and LLM providers, which are defined in `models.py`.
+
+The following lines of code can be changed to any valid combination of model and provide, so long as the new vision model supports vision input and the new action model supports tool use.
+
+```
+vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
+action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
+```
+
+If you add models or define a new provider, feel free to make a PR to this repository.

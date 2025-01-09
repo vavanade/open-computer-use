@@ -9,8 +9,14 @@ load_dotenv()
 # Model names can vary from provider to provider, and are standardized here:
 model_names = {
     "llama": {"llama3.2": "llama3.2-90b-vision", "llama3.3": "llama3.3-70b"},
-    "openrouter": {"llama3.2": "meta-llama/llama-3.2-90b-vision-instruct"},
-    "fireworks": {"llama3.3": "accounts/fireworks/models/llama-v3p3-70b-instruct"},
+    "openrouter": {
+        "llama3.2": "meta-llama/llama-3.2-90b-vision-instruct",
+    },
+    "fireworks": {
+        "llama3.2": "accounts/fireworks/models/llama-v3p2-90b-vision-instruct",
+        "llama3.3": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+    },
+    "deepseek": {"deepseek-chat": "deepseek-chat"},
 }
 
 
@@ -32,22 +38,8 @@ class FireworksProvider(LLMProvider):
     api_key = os.getenv("FIREWORKS_API_KEY")
 
 
-# The OS-Atlas provider is separately implemented.
+# Define the models to use in the agent
+
 grounding_model = OSAtlasProvider()
-
-
-# Choose the models to use based on the defined environment variables.
-
-if os.getenv("LLAMA_API_KEY"):
-    print("Using Llama API for Llama 3.2")
-    vision_model = LlamaProvider(model_names["llama"]["llama3.2"])
-
-    print("Using Llama API for Llama 3.3")
-    action_model = LlamaProvider(model_names["llama"]["llama3.3"])
-
-else:
-    print("Using OpenRouter for Llama 3.2")
-    vision_model = OpenRouterProvider(model_names["openrouter"]["llama3.2"])
-
-    print("Using Fireworks for Llama 3.3")
-    action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
+vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
+action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])

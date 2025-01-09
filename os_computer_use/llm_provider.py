@@ -22,6 +22,7 @@ class LLMProvider:
         if not self.api_key:
             raise ValueError("No API key provided.")
         self.model = model
+        print(f"Using {self.__class__.__name__} with {self.model}")
         # Initialize OpenAI client
         self.client = OpenAI(base_url=self.base_url, api_key=self.api_key)
 
