@@ -1,8 +1,6 @@
 from os_computer_use.grounding import draw_big_dot, extract_bbox_midpoint
-from os_computer_use.llm import (
-    call_grounding_model,
-    call_action_model,
-    call_vision_model,
+from os_computer_use.models import vision_model, action_model, grounding_model
+from os_computer_use.llm_helpers import (
     Message,
     Text,
     Image as Base64Image,
@@ -139,7 +137,7 @@ class SandboxAgent:
     def click_element(self, query, click_command, action_name="click"):
         """Base method for all click operations"""
         self.take_screenshot()
-        bbox, image_url = call_grounding_model(
+        bbox, image_url = grounding_model.call(
             query + "\nReturn the response in the form of a bbox",
             self.latest_screenshot,
         )
@@ -180,7 +178,7 @@ class SandboxAgent:
         convert_to_content = lambda message: (
             Base64Image(message) if isinstance(message, bytes) else Text(message)
         )
-        return call_vision_model(
+        return vision_model.call(
             [
                 *self.messages,
                 Message(
@@ -211,7 +209,7 @@ class SandboxAgent:
             # Stop the sandbox from timing out
             self.sandbox.set_timeout(60)
 
-            content, tool_calls = call_action_model(
+            content, tool_calls = action_model.call(
                 [
                     Message(
                         "You are an AI assistant with computer use abilities.",
