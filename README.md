@@ -1,4 +1,4 @@
-# Open Source Computer Use
+# Open Computer Use
 
 A secure cloud Linux computer powered by [E2B Desktop Sandbox](https://github.com/e2b-dev/desktop/) and controlled by open-source LLMs.
 
@@ -16,7 +16,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 
 ## Design
 
-![Open Source Computer Use Architecture](https://github.com/user-attachments/assets/3769808f-4a3d-422d-86ec-e6ebc1cc4513)
+![Open Computer Use Architecture](https://github.com/user-attachments/assets/3769808f-4a3d-422d-86ec-e6ebc1cc4513)
 
 The details of the design are laid out in this article: [How I taught an AI to use a computer](https://blog.jamesmurdza.com/how-i-taught-an-ai-to-use-a-computer)
 
