@@ -6,6 +6,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 
 ## Features
 
+- Use [E2B](https://e2b.dev) for secure [Desktop Sandbox](https://github.com/e2b-dev/desktop)
 - Uses [Llama 3.2](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_2), [3.3](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_3/) and [OS-Atlas](https://osatlas.github.io/)
 - Operates the computer via a combination of keyboard, mouse, and shell commands
 - Live streams the display of the sandbox on the client computer
