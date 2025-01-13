@@ -7,12 +7,11 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 ## Features
 
 - Uses [E2B](https://e2b.dev) for secure [Desktop Sandbox](https://github.com/e2b-dev/desktop)
-- Uses [Llama 3.2](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_2), [3.3](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_3/) and [OS-Atlas](https://osatlas.github.io/)
-- Operates the computer via a combination of keyboard, mouse, and shell commands
+- Supports [Meta Llama](https://www.llama.com/), [OS-Atlas](https://osatlas.github.io/) and [any LLM you want to integrate](#llm-support)!
+- Operates the computer via the keyboard, mouse, and shell commands
 - Live streams the display of the sandbox on the client computer
-- The user can pause the agent and provide feedback and any time
-- Designed to work on any operating system or platform
-- Supports a number of inference providers, including Hugging Face, Fireworks, OpenRouter, etc.
+- User can pause and prompt the agent at any time
+- Uses Ubuntu, but designed to work with any operating system
 
 ## Design
 
@@ -20,6 +19,28 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 ![Open Computer Use Architecture](./assets/architecture-light.png#gh-light-mode-only)
 
 The details of the design are laid out in this article: [How I taught an AI to use a computer](https://blog.jamesmurdza.com/how-i-taught-an-ai-to-use-a-computer)
+
+## LLM support
+
+Open Computer Use is designed to easily support new LLMs. The LLM and provider combinations are are defined in [models.py](/blob/master/os_computer_use/models.py). Following the comments in this file, one can easily add any LLM and provider that adheres to the OpenAI API specification.
+
+The list of tested models and providers currently includes:
+
+| **Type**       | **Model**      | **Providers**                        |
+|-----------------|----------------|---------------------------------------|
+| Vision      | **Llama 3.2**      | **Fireworks**, OpenRouter, Llama API     |
+| Action      | **Llama 3.2**      | **Fireworks**, Llama API                 |
+| Action      | DeepSeek           | DeepSeek                             |
+| Grounding   | **OS-Atlas**       | **HuggingFace Spaces**                   |
+
+The following lines of code in [models.py](/blob/master/os_computer_use/models.py) define the default LLMs and providers:
+
+```
+vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
+action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
+```
+
+If you add a new model or provider, please make a PR to this repository!
 
 ## Get started
 
@@ -75,16 +96,3 @@ poetry run start
 ```
 
 The agent will start and prompt you for its first instruction.
-
-## LLM support
-
-Open Computer Use supports a variety of LLMs and LLM providers, which are defined in `models.py`.
-
-The following lines of code can be changed to any valid combination of model and provide, so long as the new vision model supports vision input and the new action model supports tool use.
-
-```
-vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
-action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
-```
-
-If you add models or define a new provider, feel free to make a PR to this repository.
