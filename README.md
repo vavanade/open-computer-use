@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 
 ![Open Computer Use Architecture](https://github.com/user-attachments/assets/3769808f-4a3d-422d-86ec-e6ebc1cc4513)
 
-The details of the design are laid out in this article: [How I taught an AI to use a computer](https://blog.jamesmurdza.com/how-i-taught-an-ai-to-use-a-computer)
+The details of the design are laid out in this article: [How I taught an AI to use a computer](./assets/architecture.jpg)
 
 ## Get started
 
