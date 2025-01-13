@@ -17,7 +17,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 ## Design
 
 ![Open Computer Use Architecture](./assets/architecture.png#gh-dark-mode-only)
-![Open Computer Use Architecture](./assets/architecture.png#gh-light-mode-only)
+![Open Computer Use Architecture](./assets/architecture-light.png#gh-light-mode-only)
 
 The details of the design are laid out in this article: [How I taught an AI to use a computer](https://blog.jamesmurdza.com/how-i-taught-an-ai-to-use-a-computer)
 
