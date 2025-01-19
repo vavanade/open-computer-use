@@ -29,7 +29,7 @@ The list of tested models and providers currently includes:
 | **Type**       | **Model**      | **Providers**                        |
 |-----------------|----------------|---------------------------------------|
 | Vision      | **Llama 3.2**      | **Fireworks**, OpenRouter, Llama API     |
-| Action      | **Llama 3.2**      | **Fireworks**, Llama API                 |
+| Action      | **Llama 3.3**      | **Fireworks**, Llama API                 |
 | Action      | DeepSeek           | DeepSeek                             |
 | Grounding   | **OS-Atlas**       | **HuggingFace Spaces**                   |
 
