@@ -55,5 +55,5 @@ class GeminiProvider(LLMProvider):
 # Define the models to use in the agent
 
 grounding_model = OSAtlasProvider()
-vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
-action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
+vision_model = GeminiProvider("gemini-2.0-flash-exp")
+action_model = GeminiProvider("gemini-2.0-flash-exp")
