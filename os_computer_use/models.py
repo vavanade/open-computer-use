@@ -17,6 +17,10 @@ model_names = {
         "llama3.3": "accounts/fireworks/models/llama-v3p3-70b-instruct",
     },
     "deepseek": {"deepseek-chat": "deepseek-chat"},
+    "gemini": {
+        "gemini-1.5-flash": "gemini-1.5-flash",
+        "gemini-2.0-flash": "gemini-2.0-flash-exp",
+    },
 }
 
 
@@ -41,6 +45,11 @@ class FireworksProvider(LLMProvider):
 class DeepSeekProvider(LLMProvider):
     base_url = "https://api.deepseek.com"
     api_key = os.getenv("DEEPSEEK_API_KEY")
+
+
+class GeminiProvider(LLMProvider):
+    base_url = "https://generativelanguage.googleapis.com/v1beta/openai"
+    api_key = os.getenv("GEMINI_API_KEY")
 
 
 # Define the models to use in the agent

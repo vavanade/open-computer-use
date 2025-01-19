@@ -29,8 +29,10 @@ The list of tested models and providers currently includes:
 | **Type**       | **Model**      | **Providers**                        |
 |-----------------|----------------|---------------------------------------|
 | Vision      | **Llama 3.2**      | **Fireworks**, OpenRouter, Llama API     |
+| Vision      | Gemini 2.0 Flash   | Google                             |
 | Action      | **Llama 3.3**      | **Fireworks**, Llama API                 |
 | Action      | DeepSeek           | DeepSeek                             |
+| Action      | Gemini 2.0 Flash   | Google                             |
 | Grounding   | **OS-Atlas**       | **HuggingFace Spaces**                   |
 
 The following lines of code in [models.py](/blob/master/os_computer_use/models.py) define the default LLMs and providers:
