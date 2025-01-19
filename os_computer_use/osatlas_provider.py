@@ -1,4 +1,7 @@
 from gradio_client import Client, handle_file
+from os_computer_use.logging import logger
+
+from os_computer_use.grounding import extract_bbox_midpoint
 
 OSATLAS_HUGGINGFACE_SOURCE = "maxiw/OS-ATLAS"
 OSATLAS_HUGGINGFACE_MODEL = "OS-Copilot/OS-Atlas-Base-7B"
@@ -16,8 +19,11 @@ class OSAtlasProvider:
     def call(self, prompt, image_data):
         result = self.client.predict(
             image=handle_file(image_data),
-            text_input=prompt,
+            text_input=prompt + "\nReturn the response in the form of a bbox",
             model_id=OSATLAS_HUGGINGFACE_MODEL,
             api_name=OSATLAS_HUGGINGFACE_API,
         )
-        return result[1], result[2]
+        position = extract_bbox_midpoint(result[1])
+        image_url = result[2]
+        logger.log(f"bbox {image_url}", "gray")
+        return position
