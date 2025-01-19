@@ -1,5 +1,6 @@
 from os_computer_use.streaming import Sandbox, DisplayClient
 from os_computer_use.sandbox_agent import SandboxAgent
+from os_computer_use.utils import print_colored
 import asyncio
 import argparse
 
@@ -42,6 +43,9 @@ async def start(user_input=None, output_dir=None):
                     agent.run(user_input)
                     user_input = None
                 except KeyboardInterrupt:
+                    user_input = None
+                except Exception as e:
+                    print_colored(f"An error occurred: {e}", "red")
                     user_input = None
 
     finally:
