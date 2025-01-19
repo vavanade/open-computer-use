@@ -26,7 +26,7 @@ tools = {
 
 class SandboxAgent:
 
-    def __init__(self, sandbox, output_dir="."):
+    def __init__(self, sandbox, output_dir=".", save_logs=True):
         super().__init__()
         self.messages = []  # Agent memory
         self.sandbox = sandbox  # E2B sandbox
@@ -35,6 +35,7 @@ class SandboxAgent:
         self.tmp_dir = tempfile.mkdtemp()  # Folder to store screenshots
         self.logs = []  # Output logs
         self.log_file = f"{output_dir}/log.html"  # Output log file
+        self.save_logs = save_logs  # Whether to write an output log
 
         print("The agent will use the following actions:")
         for action, details in tools.items():
@@ -48,7 +49,8 @@ class SandboxAgent:
             print_colored(text, color)
         # Write to the log file
         self.logs.append({"text": text, "color": color})
-        write_log_file(self.logs, self.log_file)
+        if self.save_logs:
+            write_log_file(self.logs, self.log_file)
         return text
 
     def call_function(self, name, arguments):
