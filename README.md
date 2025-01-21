@@ -7,7 +7,7 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 ## Features
 
 - Uses [E2B](https://e2b.dev) for secure [Desktop Sandbox](https://github.com/e2b-dev/desktop)
-- Supports [Meta Llama](https://www.llama.com/), [OS-Atlas](https://osatlas.github.io/) and [any LLM you want to integrate](#llm-support)!
+- Supports [Meta Llama](https://www.llama.com/), [OS-Atlas](https://osatlas.github.io/)/[ShowUI](https://github.com/showlab/ShowUI) and [any LLM you want to integrate](#llm-support)!
 - Operates the computer via the keyboard, mouse, and shell commands
 - Live streams the display of the sandbox on the client computer
 - User can pause and prompt the agent at any time
@@ -26,14 +26,15 @@ Open Computer Use is designed to easily support new LLMs. The LLM and provider c
 
 The list of tested models and providers currently includes:
 
-| **Type**       | **Model**      | **Providers**                        |
-|-----------------|----------------|---------------------------------------|
+| **Type**    | **Model**          | **Providers**                        |
+|-------------|--------------------|---------------------------------------|
 | Vision      | **Llama 3.2**      | **Fireworks**, OpenRouter, Llama API     |
 | Vision      | Gemini 2.0 Flash   | Google                             |
 | Action      | **Llama 3.3**      | **Fireworks**, Llama API                 |
 | Action      | DeepSeek           | DeepSeek                             |
 | Action      | Gemini 2.0 Flash   | Google                             |
 | Grounding   | **OS-Atlas**       | **HuggingFace Spaces**                   |
+| Grounding   | ShowUI             | HuggingFace Spaces                   |
 
 The following lines of code in [models.py](/blob/master/os_computer_use/models.py) define the default LLMs and providers:
 
