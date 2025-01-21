@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from os_computer_use.llm_provider import LLMProvider
 from os_computer_use.osatlas_provider import OSAtlasProvider
+from os_computer_use.showui_provider import ShowUIProvider
 
 # Load environment variables from .env file
 load_dotenv()
@@ -54,6 +55,7 @@ class GeminiProvider(LLMProvider):
 
 # Define the models to use in the agent
 
+# grounding_model = ShowUIProvider()
 grounding_model = OSAtlasProvider()
 vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
 action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
