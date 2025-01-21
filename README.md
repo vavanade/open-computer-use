@@ -39,8 +39,9 @@ The list of tested models and providers currently includes:
 The following lines of code in [models.py](/blob/master/os_computer_use/models.py) define the default LLMs and providers:
 
 ```
-vision_model = FireworksProvider(model_names["fireworks"]["llama3.2"])
-action_model = FireworksProvider(model_names["fireworks"]["llama3.3"])
+grounding_model = OSAtlasProvider()
+vision_model = FireworksProvider("llama3.2")
+action_model = FireworksProvider("llama3.3")
 ```
 
 If you add a new model or provider, please make a PR to this repository!
