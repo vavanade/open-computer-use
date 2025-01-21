@@ -15,13 +15,16 @@ class LLMProvider:
     base_url = None
     api_key = None
 
+    # Mapping of model aliases
+    aliases = []
+
     def __init__(self, model):
         # Validate base URL and API key
         if not self.base_url:
             raise ValueError("No base URL provided.")
         if not self.api_key:
             raise ValueError("No API key provided.")
-        self.model = model
+        self.model = self.aliases.get(model, model)
         print(f"Using {self.__class__.__name__} with {self.model}")
         # Initialize OpenAI client
         self.client = OpenAI(base_url=self.base_url, api_key=self.api_key)
