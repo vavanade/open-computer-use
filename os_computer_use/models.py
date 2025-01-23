@@ -36,6 +36,11 @@ class DeepSeekProvider(LLMProvider):
     api_key = os.getenv("DEEPSEEK_API_KEY")
 
 
+class OpenAIProvider(LLMProvider):
+    base_url = "https://api.openai.com/v1"
+    api_key = os.getenv("OPENAI_API_KEY")
+
+
 class GeminiProvider(LLMProvider):
     base_url = "https://generativelanguage.googleapis.com/v1beta/openai"
     api_key = os.getenv("GEMINI_API_KEY")
