@@ -1,9 +1,5 @@
-from os_computer_use.models import vision_model, action_model, grounding_model
-from os_computer_use.llm_helpers import (
-    Message,
-    Text,
-    Image as Base64Image,
-)
+from os_computer_use.config import vision_model, action_model, grounding_model
+from os_computer_use.llm_provider import Message
 from os_computer_use.logging import logger
 from os_computer_use.grounding import draw_big_dot
 
@@ -161,25 +157,19 @@ class SandboxAgent:
         return self.click_element(query, "xdotool click 3", "right click")
 
     def append_screenshot(self):
-        convert_to_content = lambda message: (
-            Base64Image(message) if isinstance(message, bytes) else Text(message)
-        )
         return vision_model.call(
             [
                 *self.messages,
                 Message(
-                    map(
-                        convert_to_content,
-                        [
-                            self.take_screenshot(),
-                            "This image shows the current display of the computer. Please respond in the following format:\n"
-                            "The objective is: [put the objective here]\n"
-                            "On the screen, I see: [an extensive list of everything that might be relevant to the objective including windows, icons, menus, apps, and UI elements]\n"
-                            "This means the objective is: [complete|not complete]\n\n"
-                            "(Only continue if the objective is not complete.)\n"
-                            "The next step is to [click|type|run the shell command] [put the next single step here] in order to [put what you expect to happen here].",
-                        ],
-                    ),
+                    [
+                        self.take_screenshot(),
+                        "This image shows the current display of the computer. Please respond in the following format:\n"
+                        "The objective is: [put the objective here]\n"
+                        "On the screen, I see: [an extensive list of everything that might be relevant to the objective including windows, icons, menus, apps, and UI elements]\n"
+                        "This means the objective is: [complete|not complete]\n\n"
+                        "(Only continue if the objective is not complete.)\n"
+                        "The next step is to [click|type|run the shell command] [put the next single step here] in order to [put what you expect to happen here].",
+                    ],
                     role="user",
                 ),
             ]
