@@ -53,3 +53,9 @@ class AnthropicProvider(AnthropicBaseProvider):
         "claude-3.5-haiku": "claude-3-5-haiku-20241022",
         "claude-3-opus": "claude-3-opus-20240229",
     }
+
+
+class GroqProvider(OpenAIBaseProvider):
+    base_url = "https://api.groq.com/openai/v1"
+    api_key = os.getenv("GROQ_API_KEY")
+    aliases = {"llama3.2": "llama-3.2-90b-vision-preview"}
