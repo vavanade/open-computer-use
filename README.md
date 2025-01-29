@@ -22,7 +22,7 @@ The details of the design are laid out in this article: [How I taught an AI to u
 
 ## LLM support
 
-Open Computer Use is designed to make it easy to swap in and out new LLMs. The LLMs used by the agent are specified in [config.py](/blob/master/os_computer_use/config.py) like this:
+Open Computer Use is designed to make it easy to swap in and out new LLMs. The LLMs used by the agent are specified in [config.py](/os_computer_use/config.py) like this:
 
 ```
 grounding_model = providers.OSAtlasProvider()
@@ -30,7 +30,7 @@ vision_model = providers.FireworksProvider("llama3.2")
 action_model = providers.FireworksProvider("llama3.3")
 ```
 
-The providers are imported from [providers.py](/blob/master/os_computer_use/providers.py) and include:
+The providers are imported from [providers.py](/os_computer_use/providers.py) and include:
 
 - Fireworks, OpenRouter, Llama API:
   - Llama 3.2 (vision only), Llama 3.3 (action only)
@@ -48,7 +48,7 @@ The providers are imported from [providers.py](/blob/master/os_computer_use/prov
   - OS-Atlas (grounding)
   - ShowUI (grounding)
 
-If you add a new model or provider, please [make a PR](/pulls) to this repository with the updated providers.py!
+If you add a new model or provider, please [make a PR](../../pulls) to this repository with the updated providers.py!
 
 ## Get started
 
