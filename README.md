@@ -86,9 +86,21 @@ cd open-computer-use
 Create a `.env` file in `open-computer-use` and set the following:
 
 ```sh
-# Get your API key here - https://e2b.dev/
+# Get your API key here: https://e2b.dev/
 E2B_API_KEY="your-e2b-api-key"
-FIREWORKS_API_KEY="your-fireworks-api-key"
+```
+
+Additionally, add API key(s) for any LLM providers you're using:
+```
+# You only need the API key for the provider(s) selected in config.py:
+# Hugging Face Spaces do not require an API key.
+FIREWORKS_API_KEY=...
+OPENROUTER_API_KEY=...
+LLAMA_API_KEY=...
+GROQ_API_KEY=...
+GEMINI_API_KEY=...
+OPENAI_API_KEY=...
+ANTHROPIC_API_KEY=...
 ```
 
 ### 4. Start the web interface
