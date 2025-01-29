@@ -22,29 +22,33 @@ The details of the design are laid out in this article: [How I taught an AI to u
 
 ## LLM support
 
-Open Computer Use is designed to easily support new LLMs. The LLM and provider combinations are are defined in [models.py](/blob/master/os_computer_use/models.py). Following the comments in this file, one can easily add any LLM and provider that adheres to the OpenAI API specification.
-
-The list of tested models and providers currently includes:
-
-| **Type**    | **Model**          | **Providers**                        |
-|-------------|--------------------|---------------------------------------|
-| Vision      | **Llama 3.2**      | **Fireworks**, OpenRouter, Llama API     |
-| Vision      | Gemini 2.0 Flash   | Google                             |
-| Action      | **Llama 3.3**      | **Fireworks**, Llama API                 |
-| Action      | DeepSeek           | DeepSeek                             |
-| Action      | Gemini 2.0 Flash   | Google                             |
-| Grounding   | **OS-Atlas**       | **HuggingFace Spaces**                   |
-| Grounding   | ShowUI             | HuggingFace Spaces                   |
-
-The following lines of code in [models.py](/blob/master/os_computer_use/models.py) define the default LLMs and providers:
+Open Computer Use is designed to make it easy to swap in and out new LLMs. The LLMs used by the agent are specified in [config.py](/blob/master/os_computer_use/config.py) like this:
 
 ```
-grounding_model = OSAtlasProvider()
-vision_model = FireworksProvider("llama3.2")
-action_model = FireworksProvider("llama3.3")
+grounding_model = providers.OSAtlasProvider()
+vision_model = providers.FireworksProvider("llama3.2")
+action_model = providers.FireworksProvider("llama3.3")
 ```
 
-If you add a new model or provider, please make a PR to this repository!
+The providers are imported from [providers.py](/blob/master/os_computer_use/providers.py) and include:
+
+- Fireworks, OpenRouter, Llama API:
+  - Llama 3.2 (vision only), Llama 3.3 (action only)
+- Groq:
+  - Llama 3.2 (vision + action), Llama 3.3 (action only)
+- DeepSeek:
+  - DeepSeek (action only)
+- Google:
+  - Gemini 2.0 Flash (vision + action)
+- OpenAI:
+  - GPT-4o and GPT-4o mini (vision + action)
+- Anthropic:
+  - Claude (vision + action)
+- HuggingFace Spaces:
+  - OS-Atlas (grounding)
+  - ShowUI (grounding)
+
+If you add a new model or provider, please [make a PR](/pulls) to this repository with the updated providers.py!
 
 ## Get started
 
