@@ -7,8 +7,8 @@ https://github.com/user-attachments/assets/3837c4f6-45cb-43f2-9d51-a45f742424d4
 ## Features
 
 - Uses [E2B](https://e2b.dev) for secure [Desktop Sandbox](https://github.com/e2b-dev/desktop)
-- Supports [Meta Llama](https://www.llama.com/), [OS-Atlas](https://osatlas.github.io/)/[ShowUI](https://github.com/showlab/ShowUI) and [any LLM you want to integrate](#llm-support)!
 - Operates the computer via the keyboard, mouse, and shell commands
+- Supports 10+ LLMs, [OS-Atlas](https://osatlas.github.io/)/[ShowUI](https://github.com/showlab/ShowUI) and [any other models you want to integrate](#llm-support)!
 - Live streams the display of the sandbox on the client computer
 - User can pause and prompt the agent at any time
 - Uses Ubuntu, but designed to work with any operating system
@@ -57,7 +57,7 @@ If you add a new model or provider, please [make a PR](../../pulls) to this repo
 - Python 3.10 or later
 - [git](https://git-scm.com/)
 - [E2B API key](https://e2b.dev/dashboard?tab=keys)
-- [Fireworks API key](https://fireworks.ai/account/api-keys)
+- API key for an LLM provider (see above)
 
 ### 1. Install the prerequisites
 
@@ -115,4 +115,13 @@ poetry install
 poetry run start
 ```
 
-The agent will start and prompt you for its first instruction.
+The agent will open and prompt you for its first instruction.
+
+To start the agent with a specified prompt, run:
+
+```sh
+poetry run start --prompt "use the web browser to get the current weather in sf"
+```
+
+The display stream should be visible a few seconds after the Python program starts.
+
