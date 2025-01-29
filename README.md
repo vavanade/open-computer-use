@@ -26,8 +26,8 @@ Open Computer Use is designed to make it easy to swap in and out new LLMs. The L
 
 ```
 grounding_model = providers.OSAtlasProvider()
-vision_model = providers.FireworksProvider("llama3.2")
-action_model = providers.FireworksProvider("llama3.3")
+vision_model = providers.GroqProvider("llama3.2")
+action_model = providers.GroqProvider("llama3.3")
 ```
 
 The providers are imported from [providers.py](/os_computer_use/providers.py) and include:
