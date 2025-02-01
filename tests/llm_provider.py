@@ -73,22 +73,18 @@ print(fireworks.call(messages))
 
 # Test Mistral
 mistral = MistralProvider("pixtral")  # Using mistral-small-latest
-print("\nTesting Mistral:")
+print("\nTesting Mistral :")
 print(mistral.call(toolcall_messages, tools)[1])
 print(mistral.call(messages))
 
-# Test Mistral with Pixtral
-pixtral = MistralProvider("pixtral")  # Using pixtral-large-latest for vision
-print("\nTesting Pixtral Vision:")
-try:
-    response = pixtral.call(messages)
-    print("Vision response:", response)
-except Exception as e:
-    print(f"Error with vision: {e}")
 
-print("\nTesting Pixtral Tool Calls:")
-try:
-    response, tool_calls = pixtral.call(toolcall_messages, tools)
-    print("Tool calls:", tool_calls)
-except Exception as e:
-    print(f"Error with tool calls: {e}")
+# Test Mistral Large (non-vision) using text-only messages
+mistral_large = MistralProvider("large")  # Using mistral-large-latest for non-vision tasks
+text_messages = [Message("What is the capital of France?", role="user")]
+print("\nTesting Mistral Large with text-only:")
+print(mistral_large.call(text_messages))
+
+# Test tool calls for Mistral Large using text-only messages (no image data)
+text_tool_messages = [Message("Click on the submit button", role="user")]
+print("\nTesting Mistral Large Tool Calls with text:")
+print(mistral_large.call(text_tool_messages, tools)[1])
