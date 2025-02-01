@@ -50,24 +50,24 @@ messages = [
 ]
 
 # # Anthropic
-# opus = AnthropicProvider("claude-3-opus")
-# print(opus.call(toolcall_messages, tools)[1])
-# print(opus.call(messages))
+opus = AnthropicProvider("claude-3-opus")
+print(opus.call(toolcall_messages, tools)[1])
+print(opus.call(messages))
 
 # # OpenAI
-# gpt4o = OpenAIProvider("gpt-4o")
-# print(gpt4o.call(toolcall_messages, tools)[1])
-# print(gpt4o.call(messages))
+gpt4o = OpenAIProvider("gpt-4o")
+print(gpt4o.call(toolcall_messages, tools)[1])
+print(gpt4o.call(messages))
 
 # # Groq
-# groq = GroqProvider("llama3.2")
-# print(groq.call(toolcall_messages, tools)[1])
-# print(groq.call(messages))
+groq = GroqProvider("llama3.2")
+print(groq.call(toolcall_messages, tools)[1])
+print(groq.call(messages))
 
 # # Fireworks
-# fireworks = FireworksProvider("llama3.2")
-# print(fireworks.call(toolcall_messages, tools)[1])
-# print(fireworks.call(messages))
+fireworks = FireworksProvider("llama3.2")
+print(fireworks.call(toolcall_messages, tools)[1])
+print(fireworks.call(messages))
 
 
 
