@@ -72,7 +72,7 @@ print(fireworks.call(messages))
 
 
 # Test Mistral
-mistral = MistralProvider("pixtral")  # Using mistral-small-latest
+mistral = MistralProvider("pixtral") 
 print("\nTesting Mistral :")
 print(mistral.call(toolcall_messages, tools)[1])
 print(mistral.call(messages))
