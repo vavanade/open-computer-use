@@ -3,6 +3,7 @@ from os_computer_use.providers import (
     OpenAIProvider,
     GroqProvider,
     FireworksProvider,
+    MistralProvider,
 )
 from os_computer_use.llm_provider import Message
 
@@ -10,7 +11,12 @@ from os_computer_use.llm_provider import Message
 tools = {
     "click_item": {
         "description": "Click on an item on the screen",
-        "params": {"description": "Description of the item to click on"},
+        "params": {
+            "description": {
+                "type": "string",
+                "description": "Description of the item to click on"
+            }
+        }
     }
 }
 
@@ -43,22 +49,46 @@ messages = [
     )
 ]
 
-# Anthropic
-opus = AnthropicProvider("claude-3-opus")
-print(opus.call(toolcall_messages, tools)[1])
-print(opus.call(messages))
+# # Anthropic
+# opus = AnthropicProvider("claude-3-opus")
+# print(opus.call(toolcall_messages, tools)[1])
+# print(opus.call(messages))
 
-# OpenAI
-gpt4o = OpenAIProvider("gpt-4o")
-print(gpt4o.call(toolcall_messages, tools)[1])
-print(gpt4o.call(messages))
+# # OpenAI
+# gpt4o = OpenAIProvider("gpt-4o")
+# print(gpt4o.call(toolcall_messages, tools)[1])
+# print(gpt4o.call(messages))
 
-# Groq
-groq = GroqProvider("llama3.2")
-print(groq.call(toolcall_messages, tools)[1])
-print(groq.call(messages))
+# # Groq
+# groq = GroqProvider("llama3.2")
+# print(groq.call(toolcall_messages, tools)[1])
+# print(groq.call(messages))
 
-# Fireworks
-fireworks = FireworksProvider("llama3.2")
-print(fireworks.call(toolcall_messages, tools)[1])
-print(fireworks.call(messages))
+# # Fireworks
+# fireworks = FireworksProvider("llama3.2")
+# print(fireworks.call(toolcall_messages, tools)[1])
+# print(fireworks.call(messages))
+
+
+
+# Test Mistral
+mistral = MistralProvider("pixtral")  # Using mistral-small-latest
+print("\nTesting Mistral:")
+print(mistral.call(toolcall_messages, tools)[1])
+print(mistral.call(messages))
+
+# Test Mistral with Pixtral
+pixtral = MistralProvider("pixtral")  # Using pixtral-large-latest for vision
+print("\nTesting Pixtral Vision:")
+try:
+    response = pixtral.call(messages)
+    print("Vision response:", response)
+except Exception as e:
+    print(f"Error with vision: {e}")
+
+print("\nTesting Pixtral Tool Calls:")
+try:
+    response, tool_calls = pixtral.call(toolcall_messages, tools)
+    print("Tool calls:", tool_calls)
+except Exception as e:
+    print(f"Error with tool calls: {e}")

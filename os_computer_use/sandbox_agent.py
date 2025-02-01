@@ -53,9 +53,14 @@ class SandboxAgent:
 
     def tool(description, params):
         def decorator(func):
-            tools[func.__name__] = {"description": description, "params": params}
+            wrapped_params = {}
+            for key, value in params.items():
+                if isinstance(value, dict):
+                    wrapped_params[key] = value
+                else:
+                    wrapped_params[key] = {"type": "string", "description": value}
+            tools[func.__name__] = {"description": description, "params": wrapped_params}
             return func
-
         return decorator
 
     def save_image(self, image, prefix="image"):
@@ -176,6 +181,8 @@ class SandboxAgent:
         )
 
     def run(self, instruction):
+        # ensure the last message is from the user (not assistant)
+        messages = [Message(instruction, role="user")]
 
         self.messages.append(Message(f"OBJECTIVE: {instruction}"))
         logger.log(f"USER: {instruction}", print=False)
@@ -193,10 +200,12 @@ class SandboxAgent:
                     ),
                     *self.messages,
                     Message(
-                        logger.log(f"THOUGHT: {self.append_screenshot()}", "green")
+                        logger.log(f"THOUGHT: {self.append_screenshot()}", "green"),
+                        role="assistant",
                     ),
                     Message(
                         "I will now use tool calls to take these actions, or use the stop command if the objective is complete.",
+                        role="user"
                     ),
                 ],
                 tools,
