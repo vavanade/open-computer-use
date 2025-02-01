@@ -47,6 +47,7 @@ The providers are imported from [providers.py](/os_computer_use/providers.py) an
 - HuggingFace Spaces:
   - OS-Atlas (grounding)
   - ShowUI (grounding)
+- Mistral AI (Pixtral for vision, Mistral Large for actions)
 
 If you add a new model or provider, please [make a PR](../../pulls) to this repository with the updated providers.py!
 
