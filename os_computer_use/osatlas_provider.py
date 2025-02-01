@@ -1,6 +1,5 @@
 from gradio_client import Client, handle_file
 from os_computer_use.logging import logger
-import os
 
 from os_computer_use.grounding import extract_bbox_midpoint
 
@@ -8,15 +7,13 @@ OSATLAS_HUGGINGFACE_SOURCE = "maxiw/OS-ATLAS"
 OSATLAS_HUGGINGFACE_MODEL = "OS-Copilot/OS-Atlas-Base-7B"
 OSATLAS_HUGGINGFACE_API = "/run_example"
 
-HF_TOKEN = os.getenv("HF_TOKEN")
-
 class OSAtlasProvider:
     """
     The OS-Atlas provider is used to make calls to OS-Atlas.
     """
 
-    def __init__(self, hf_token=HF_TOKEN):
-        self.client = Client(OSATLAS_HUGGINGFACE_SOURCE, hf_token=HF_TOKEN)
+    def __init__(self):
+        self.client = Client(OSATLAS_HUGGINGFACE_SOURCE)
 
     def call(self, prompt, image_data):
         result = self.client.predict(
