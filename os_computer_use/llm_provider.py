@@ -49,7 +49,10 @@ class LLMProvider:
             required = []
 
             for param_name, param_desc in details["params"].items():
-                properties[param_name] = {"type": "string", "description": param_desc}
+                if isinstance(param_desc, dict):
+                    properties[param_name] = param_desc
+                else:
+                    properties[param_name] = {"type": "string", "description": param_desc}
                 required.append(param_name)
 
             function_def = self.create_function_def(name, details, properties, required)

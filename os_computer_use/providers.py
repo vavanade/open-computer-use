@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 from os_computer_use.llm_provider import OpenAIBaseProvider, AnthropicBaseProvider
 from os_computer_use.osatlas_provider import OSAtlasProvider
 from os_computer_use.showui_provider import ShowUIProvider
-import base64
-import json
 
 # Load environment variables from .env file
 load_dotenv()
@@ -64,7 +62,6 @@ class GroqProvider(OpenAIBaseProvider):
         "llama3.2": "llama-3.2-90b-vision-preview",
         "llama3.3": "llama-3.3-70b-versatile",
     }
-
 
 class MistralProvider(OpenAIBaseProvider):
     base_url = "https://api.mistral.ai/v1"
