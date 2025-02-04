@@ -3,7 +3,6 @@ from dotenv import load_dotenv
 from os_computer_use.llm_provider import OpenAIBaseProvider, AnthropicBaseProvider
 from os_computer_use.osatlas_provider import OSAtlasProvider
 from os_computer_use.showui_provider import ShowUIProvider
-from openai import OpenAI
 import base64
 import json
 

@@ -11,14 +11,10 @@ from os_computer_use.llm_provider import Message
 tools = {
     "click_item": {
         "description": "Click on an item on the screen",
-        "params": {
-            "description": {
-                "type": "string",
-                "description": "Description of the item to click on"
-            }
-        }
+        "params": {"description": "Description of the item to click on"},
     }
 }
+
 
 
 # Function to simulate taking a screenshot
