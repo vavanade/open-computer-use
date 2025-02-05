@@ -45,36 +45,36 @@ messages = [
     )
 ]
 
-# # Anthropic
+# Anthropic
 opus = AnthropicProvider("claude-3-opus")
 print(opus.call(toolcall_messages, tools)[1])
 print(opus.call(messages))
 
-# # OpenAI
+# OpenAI
 gpt4o = OpenAIProvider("gpt-4o")
 print(gpt4o.call(toolcall_messages, tools)[1])
 print(gpt4o.call(messages))
 
-# # Groq
+# Groq
 groq = GroqProvider("llama3.2")
 print(groq.call(toolcall_messages, tools)[1])
 print(groq.call(messages))
 
-# # Fireworks
+# Fireworks
 fireworks = FireworksProvider("llama3.2")
 print(fireworks.call(toolcall_messages, tools)[1])
 print(fireworks.call(messages))
 
 
 
-# Test Mistral
+# Pixtral
 mistral = MistralProvider("pixtral") 
 print("\nTesting Mistral :")
 print(mistral.call(toolcall_messages, tools)[1])
 print(mistral.call(messages))
 
 
-# Test Mistral Large (non-vision) using text-only messages
+# Mistral Large (non-vision) using text-only messages
 mistral_large = MistralProvider("large")  # Using mistral-large-latest for non-vision tasks
 text_messages = [Message("What is the capital of France?", role="user")]
 print("\nTesting Mistral Large with text-only:")

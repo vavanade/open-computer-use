@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-from os_computer_use.llm_provider import OpenAIBaseProvider, AnthropicBaseProvider
+from os_computer_use.llm_provider import OpenAIBaseProvider, AnthropicBaseProvider, MistralBaseProvider
 from os_computer_use.osatlas_provider import OSAtlasProvider
 from os_computer_use.showui_provider import ShowUIProvider
 
@@ -63,7 +63,7 @@ class GroqProvider(OpenAIBaseProvider):
         "llama3.3": "llama-3.3-70b-versatile",
     }
 
-class MistralProvider(OpenAIBaseProvider):
+class MistralProvider(MistralBaseProvider, OpenAIBaseProvider):
     base_url = "https://api.mistral.ai/v1"
     api_key = os.getenv("MISTRAL_API_KEY")
     aliases = {
