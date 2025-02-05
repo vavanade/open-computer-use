@@ -53,14 +53,9 @@ class SandboxAgent:
 
     def tool(description, params):
         def decorator(func):
-            wrapped_params = {}
-            for key, value in params.items():
-                if isinstance(value, dict):
-                    wrapped_params[key] = value
-                else:
-                    wrapped_params[key] = {"type": "string", "description": value}
-            tools[func.__name__] = {"description": description, "params": wrapped_params}
+            tools[func.__name__] = {"description": description, "params": params}
             return func
+
         return decorator
 
     def save_image(self, image, prefix="image"):
@@ -162,27 +157,34 @@ class SandboxAgent:
         return self.click_element(query, "xdotool click 3", "right click")
 
     def append_screenshot(self):
+        additional_prompt = (
+            "Please respond in the following format:\n"
+            "The objective is: [put the objective here]\n"
+            "On the screen, I see: [an extensive list of everything that might be relevant to the objective including windows, icons, menus, apps, and UI elements]\n"
+            "This means the objective is: [complete|not complete]\n\n"
+            "(Only continue if the objective is not complete.)\n"
+            "The next step is to [click|type|run the shell command] [put the next single step here] in order to [put what you expect to happen here]."
+        )
+        if "mistral" in action_model.model.lower():
+            second_msg = {"role": "assistant", "content": additional_prompt, "prefix": True}
+        else:
+            second_msg = Message(additional_prompt, role="user")
+
         return vision_model.call(
             [
                 *self.messages,
                 Message(
                     [
                         self.take_screenshot(),
-                        "This image shows the current display of the computer. Please respond in the following format:\n"
-                        "The objective is: [put the objective here]\n"
-                        "On the screen, I see: [an extensive list of everything that might be relevant to the objective including windows, icons, menus, apps, and UI elements]\n"
-                        "This means the objective is: [complete|not complete]\n\n"
-                        "(Only continue if the objective is not complete.)\n"
-                        "The next step is to [click|type|run the shell command] [put the next single step here] in order to [put what you expect to happen here].",
+                        "This image shows the current display of the computer."
                     ],
                     role="user",
                 ),
+                second_msg
             ]
         )
 
     def run(self, instruction):
-        # ensure the last message is from the user (not assistant)
-        messages = [Message(instruction, role="user")]
 
         self.messages.append(Message(f"OBJECTIVE: {instruction}"))
         logger.log(f"USER: {instruction}", print=False)
@@ -200,8 +202,7 @@ class SandboxAgent:
                     ),
                     *self.messages,
                     Message(
-                        logger.log(f"THOUGHT: {self.append_screenshot()}", "green"),
-                        role="assistant",
+                        logger.log(f"THOUGHT: {self.append_screenshot()}", "green")
                     ),
                     Message(
                         "I will now use tool calls to take these actions, or use the stop command if the objective is complete.",
