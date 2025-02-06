@@ -115,10 +115,10 @@ class OpenAIBaseProvider(LLMProvider):
             "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"},
         }
 
-    def call(self, messages, functions=None, **kwargs):
+    def call(self, messages, functions=None):
         # If functions are provided, only return actions
         tools = self.create_function_schema(functions) if functions else None
-        completion = self.completion(messages, tools=tools, **kwargs)
+        completion = self.completion(messages, tools=tools)
         message = completion.choices[0].message
 
         # Return response text and tool calls separately
