@@ -47,6 +47,7 @@ The providers are imported from [providers.py](/os_computer_use/providers.py) an
 - HuggingFace Spaces:
   - OS-Atlas (grounding)
   - ShowUI (grounding)
+- Mistral AI (Pixtral for vision, Mistral Large for actions)
 
 If you add a new model or provider, please [make a PR](../../pulls) to this repository with the updated providers.py!
 
@@ -101,6 +102,8 @@ GROQ_API_KEY=...
 GEMINI_API_KEY=...
 OPENAI_API_KEY=...
 ANTHROPIC_API_KEY=...
+# Required: Provide your Hugging Face token to bypass Gradio rate limits.
+HF_TOKEN=...
 ```
 
 ### 4. Start the web interface

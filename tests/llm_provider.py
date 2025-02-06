@@ -3,6 +3,7 @@ from os_computer_use.providers import (
     OpenAIProvider,
     GroqProvider,
     FireworksProvider,
+    MistralProvider,
 )
 from os_computer_use.llm_provider import Message
 
@@ -13,6 +14,7 @@ tools = {
         "params": {"description": "Description of the item to click on"},
     }
 }
+
 
 
 # Function to simulate taking a screenshot
@@ -62,3 +64,23 @@ print(groq.call(messages))
 fireworks = FireworksProvider("llama3.2")
 print(fireworks.call(toolcall_messages, tools)[1])
 print(fireworks.call(messages))
+
+
+
+# Pixtral
+mistral = MistralProvider("pixtral") 
+print("\nTesting Mistral :")
+print(mistral.call(toolcall_messages, tools)[1])
+print(mistral.call(messages))
+
+
+# Mistral Large (non-vision) using text-only messages
+mistral_large = MistralProvider("large")  # Using mistral-large-latest for non-vision tasks
+text_messages = [Message("What is the capital of France?", role="user")]
+print("\nTesting Mistral Large with text-only:")
+print(mistral_large.call(text_messages))
+
+# Test tool calls for Mistral Large using text-only messages (no image data)
+text_tool_messages = [Message("Click on the submit button", role="user")]
+print("\nTesting Mistral Large Tool Calls with text:")
+print(mistral_large.call(text_tool_messages, tools)[1])
