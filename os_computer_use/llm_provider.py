@@ -211,12 +211,14 @@ class MistralBaseProvider(OpenAIBaseProvider):
         if isinstance(details.get("description"), dict):
             details["description"] = details["description"].get("description", "")
         return super().create_function_def(name, details, properties, required)
-    
+
     def call(self, messages, functions=None):
         if messages and messages[-1].get("role") == "assistant":
             prefix = messages.pop()["content"]
             if messages and messages[-1].get("role") == "user":
-                messages[-1]["content"] = prefix + "\n" + messages[-1].get("content", "")
+                messages[-1]["content"] = (
+                    prefix + "\n" + messages[-1].get("content", "")
+                )
             else:
                 messages.append({"role": "user", "content": prefix})
         return super().call(messages, functions)

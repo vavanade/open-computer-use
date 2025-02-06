@@ -18,7 +18,7 @@ class OSAtlasProvider:
     """
 
     def __init__(self):
-        self.client = Client(OSATLAS_HUGGINGFACE_SOURCE,  hf_token=HF_TOKEN)
+        self.client = Client(OSATLAS_HUGGINGFACE_SOURCE, hf_token=HF_TOKEN)
 
     def call(self, prompt, image_data):
         result = self.client.predict(

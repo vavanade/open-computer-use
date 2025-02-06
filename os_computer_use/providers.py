@@ -1,6 +1,10 @@
 import os
 from dotenv import load_dotenv
-from os_computer_use.llm_provider import OpenAIBaseProvider, AnthropicBaseProvider, MistralBaseProvider
+from os_computer_use.llm_provider import (
+    OpenAIBaseProvider,
+    AnthropicBaseProvider,
+    MistralBaseProvider,
+)
 from os_computer_use.osatlas_provider import OSAtlasProvider
 from os_computer_use.showui_provider import ShowUIProvider
 
@@ -63,6 +67,7 @@ class GroqProvider(OpenAIBaseProvider):
         "llama3.3": "llama-3.3-70b-versatile",
     }
 
+
 class MistralProvider(MistralBaseProvider):
     base_url = "https://api.mistral.ai/v1"
     api_key = os.getenv("MISTRAL_API_KEY")
@@ -70,5 +75,5 @@ class MistralProvider(MistralBaseProvider):
         "small": "mistral-small-latest",
         "medium": "mistral-medium-latest",
         "large": "mistral-large-latest",
-        "pixtral": "pixtral-large-latest"
+        "pixtral": "pixtral-large-latest",
     }
