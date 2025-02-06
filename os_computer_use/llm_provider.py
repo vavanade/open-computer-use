@@ -57,6 +57,14 @@ class LLMProvider:
 
         return functions
 
+    # Represent a tool call as an object
+    def create_tool_call(self, name, parameters):
+        return {
+            "type": "function",
+            "name": name,
+            "parameters": parameters,
+        }
+
     # Wrap a content block in a text or an image object
     def wrap_block(self, block):
         if isinstance(block, bytes):
@@ -125,22 +133,24 @@ class OpenAIBaseProvider(LLMProvider):
         if functions:
             tool_calls = message.tool_calls or []
             combined_tool_calls = [
-                {
-                    "type": "function",
-                    "name": tool_call.function.name,
-                    "parameters": parse_json(tool_call.function.arguments),
-                }
+                self.create_tool_call(
+                    tool_call.function.name, parse_json(tool_call.function.arguments)
+                )
                 for tool_call in tool_calls
                 if parse_json(tool_call.function.arguments) is not None
             ]
 
-            # Sometimes, Llama function calls are not parsed by the inference provider. This code parses them manually.
+            # Sometimes, function calls are returned unparsed by the inference provider. This code parses them manually.
             if message.content and not tool_calls:
                 tool_call_matches = re.search(r"\{.*\}", message.content)
                 if tool_call_matches:
                     tool_call = parse_json(tool_call_matches.group(0))
-                    if tool_call.get("name") and tool_call.get("parameters"):
-                        combined_tool_calls.append(tool_call)
+                    # Some models use "arguments" as the key instead of "parameters"
+                    parameters = tool_call.get("parameters", tool_call.get("arguments"))
+                    if tool_call.get("name") and parameters:
+                        combined_tool_calls.append(
+                            self.create_tool_call(tool_call.get("name"), parameters)
+                        )
                         return None, combined_tool_calls
 
             return message.content, combined_tool_calls
@@ -194,7 +204,7 @@ class AnthropicBaseProvider(LLMProvider):
         # Return response text and tool calls separately
         if functions:
             tool_calls = [
-                {"type": "function", "name": block.name, "parameters": block.input}
+                self.create_tool_call(block.name, block.input)
                 for block in completion.content
                 if block.type == "tool_use"
             ]
