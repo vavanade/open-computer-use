@@ -77,3 +77,12 @@ class MistralProvider(MistralBaseProvider):
         "large": "mistral-large-latest",
         "pixtral": "pixtral-large-latest",
     }
+
+
+class MoonshotProvider(OpenAIBaseProvider):
+    base_url = "https://api.moonshot.cn/v1"
+    api_key = os.getenv("MOONSHOT_API_KEY")
+    aliases = {
+        "moonshot-v1": "moonshot-v1-128k",
+        "moonshot-v1-vision": "moonshot-v1-128k-vision-preview",
+    }
