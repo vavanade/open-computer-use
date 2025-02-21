@@ -1,4 +1,4 @@
-from os_computer_use.streaming import Sandbox, DisplayClient
+from os_computer_use.streaming import Sandbox, DisplayClient, Browser
 from os_computer_use.sandbox_agent import SandboxAgent
 from os_computer_use.logging import Logger
 import asyncio
@@ -19,18 +19,27 @@ os.environ["E2B_API_KEY"] = os.getenv("E2B_API_KEY")
 async def start(user_input=None, output_dir=None):
     sandbox = None
     client = None
+    
     try:
-        sandbox = Sandbox()
-        client = DisplayClient(output_dir)
+        sandbox = Sandbox(template="desktop-dev-v2")
 
-        print("Starting the display server...")
-        stream_url = sandbox.start_stream()
-
-        print("(The display client will start in five seconds.)")
+        # The display server won't work on desktop-dev-v2 since ffmpeg is not installed
+        #client = DisplayClient(output_dir)
+        #print("Starting the display server...")
+        #stream_url = sandbox.start_stream()
+        #print("(The display client will start in five seconds.)")
         # If the display client is opened before the stream is ready, it will close immediately
-        await client.start_display_client(stream_url, user_input or "Sandbox", delay=5)
+        #await client.start(stream_url, user_input or "Sandbox", delay=5)
 
         agent = SandboxAgent(sandbox, output_dir)
+
+        print("Starting the VNC server...")
+        sandbox.vnc_server.start()
+        vnc_url = sandbox.vnc_server.get_url()
+
+        print("Starting the VNC client...")
+        browser = Browser()
+        browser.start(vnc_url, user_input or "Sandbox")
 
         while True:
             # Ask for user input, and exit if the user presses ctl-c
@@ -51,12 +60,12 @@ async def start(user_input=None, output_dir=None):
                     user_input = None
 
     finally:
-        if client:
-            print("Stopping the display client...")
-            try:
-                await client.stop_display_client()
-            except Exception as e:
-                print(f"Error stopping display client: {str(e)}")
+        #if client:
+        #    print("Stopping the display client...")
+        #    try:
+        #        await client.stop()
+        #    except Exception as e:
+        #        print(f"Error stopping display client: {str(e)}")
 
         if sandbox:
             print("Stopping the sandbox...")
@@ -65,12 +74,18 @@ async def start(user_input=None, output_dir=None):
             except Exception as e:
                 print(f"Error stopping sandbox: {str(e)}")
 
-        if client:
-            print("Saving the stream as mp4...")
-            try:
-                await client.save_stream()
-            except Exception as e:
-                print(f"Error saving stream: {str(e)}")
+        #if client:
+        #    print("Saving the stream as mp4...")
+        #    try:
+        #        await client.save_stream()
+        #    except Exception as e:
+        #        print(f"Error saving stream: {str(e)}")
+
+        print("Stopping the VNC client...")
+        try:
+            browser.stop()
+        except Exception as e:
+            print(f"Error stopping VNC client: {str(e)}")
 
 
 def initialize_output_directory(directory_format):

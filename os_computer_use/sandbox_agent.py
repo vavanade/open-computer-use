@@ -104,7 +104,7 @@ class SandboxAgent:
         params={"name": "Key or combination (e.g. 'Return', 'Ctl-C')"},
     )
     def send_key(self, name):
-        self.sandbox.commands.run(f"xdotool key -- {name}")
+        self.sandbox.press(name)
         return "The key has been pressed."
 
     @tool(
@@ -112,14 +112,7 @@ class SandboxAgent:
         params={"text": "Text to type"},
     )
     def type_text(self, text):
-        def chunks(text, n):
-            for i in range(0, len(text), n):
-                yield text[i : i + n]
-
-        results = []
-        for chunk in chunks(text, TYPING_GROUP_SIZE):
-            cmd = f"xdotool type --delay {TYPING_DELAY_MS} -- {shlex.quote(chunk)}"
-            results.append(self.sandbox.commands.run(cmd))
+        self.sandbox.write(text, chunk_size=TYPING_GROUP_SIZE, delay_in_ms=TYPING_DELAY_MS)
         return "The text has been typed."
 
     def click_element(self, query, click_command, action_name="click"):
@@ -131,8 +124,8 @@ class SandboxAgent:
         logger.log(f"{action_name} {filepath})", "gray")
 
         x, y = position
-        self.sandbox.commands.run(f"xdotool mousemove --sync {x} {y}")
-        self.sandbox.commands.run(click_command)
+        self.sandbox.move_mouse(x, y)
+        click_command()
         return f"The mouse has {action_name}ed."
 
     @tool(
@@ -140,21 +133,21 @@ class SandboxAgent:
         params={"query": "Item or UI element on the screen to click"},
     )
     def click(self, query):
-        return self.click_element(query, "xdotool click 1")
+        return self.click_element(query, self.sandbox.left_click)
 
     @tool(
         description="Double click on a specified UI element.",
         params={"query": "Item or UI element on the screen to double click"},
     )
     def double_click(self, query):
-        return self.click_element(query, "xdotool click --repeat 2 1", "double click")
+        return self.click_element(query, self.sandbox.double_click, "double click")
 
     @tool(
         description="Right click on a specified UI element.",
         params={"query": "Item or UI element on the screen to right click"},
     )
     def right_click(self, query):
-        return self.click_element(query, "xdotool click 3", "right click")
+        return self.click_element(query, self.sandbox.right_click, "right click")
 
     def append_screenshot(self):
         return vision_model.call(
