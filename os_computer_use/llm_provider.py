@@ -1,10 +1,11 @@
 from openai import OpenAI
 from anthropic import Anthropic
 
+from PIL import Image
+import io
 import json
 import re
 import base64
-import imghdr
 
 
 def Message(content, role="assistant"):
@@ -118,14 +119,14 @@ class OpenAIBaseProvider(LLMProvider):
             },
         }
 
-    def create_image_block(self, image_data):
-        # Detect the image type using imghdr.
-        image_type = imghdr.what(None, image_data)
-        if image_type is None:
-            image_type = "png"  # fallback if type cannot be detected
-
-        # Print detected image type for debugging
-        # print(f"Detected image type: {image_type}")
+    def create_image_block(self, image_data: bytes):
+        # Use Pillow to detect the image type
+        image_type = "png"  # Default to PNG if detection fails
+        try:
+            with Image.open(io.BytesIO(image_data)) as img:
+                image_type = img.format.lower()
+        except Exception as e:
+            print(f"Error detecting image type: {e}")
 
         # Base64-encode the raw image bytes.
         encoded = base64.b64encode(image_data).decode("utf-8")
