@@ -48,10 +48,14 @@ class _VNCServer:
         characters = string.ascii_letters + string.digits
         return ''.join(secrets.choice(characters) for _ in range(length))
 
-    def get_url(self, auto_connect: bool = True) -> str:
-        if auto_connect:
-            return f"{self._url}?autoconnect=true"
-        return self._url
+    def get_url(self, auto_connect: bool = True, view_only: bool = True, resize: str = "scale") -> str:
+        params = {
+            "resize": resize,
+            "view_only": "true" if view_only else "false",
+            "autoconnect": "true" if auto_connect else "false",
+        }
+        query_params = "&".join(f"{key}={value}" for key, value in params.items())
+        return f"{self._url}?{query_params}"
     
     @property
     def password(self) -> str:
