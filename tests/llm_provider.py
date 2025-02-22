@@ -65,17 +65,14 @@ fireworks = FireworksProvider("llama3.2")
 print(fireworks.call(toolcall_messages, tools)[1])
 print(fireworks.call(messages))
 
-
-
 # Pixtral
 mistral = MistralProvider("pixtral") 
 print("\nTesting Mistral :")
 print(mistral.call(toolcall_messages, tools)[1])
 print(mistral.call(messages))
 
-
 # Mistral Large (non-vision) using text-only messages
-mistral_large = MistralProvider("large")  # Using mistral-large-latest for non-vision tasks
+mistral_large = MistralProvider("mistral")
 text_messages = [Message("What is the capital of France?", role="user")]
 print("\nTesting Mistral Large with text-only:")
 print(mistral_large.call(text_messages))

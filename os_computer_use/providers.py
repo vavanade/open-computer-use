@@ -17,21 +17,21 @@ load_dotenv()
 class LlamaProvider(OpenAIBaseProvider):
     base_url = "https://api.llama-api.com"
     api_key = os.getenv("LLAMA_API_KEY")
-    aliases = {"llama3.2": "llama3.2-90b-vision", "llama3.3": "llama3.3-70b"}
+    aliases = {"llama-3.2": "llama-3.2-90b-vision", "llama-3.3": "llama-3.3-70b"}
 
 
 class OpenRouterProvider(OpenAIBaseProvider):
     base_url = "https://openrouter.ai/api/v1"
     api_key = os.getenv("OPENROUTER_API_KEY")
-    aliases = {"llama3.2": "meta-llama/llama-3.2-90b-vision-instruct"}
+    aliases = {"llama-3.2": "meta-llama/llama-3.2-90b-vision-instruct"}
 
 
 class FireworksProvider(OpenAIBaseProvider):
     base_url = "https://api.fireworks.ai/inference/v1"
     api_key = os.getenv("FIREWORKS_API_KEY")
     aliases = {
-        "llama3.2": "accounts/fireworks/models/llama-v3p2-90b-vision-instruct",
-        "llama3.3": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+        "llama-3.2": "accounts/fireworks/models/llama-v3p2-90b-vision-instruct",
+        "llama-3.3": "accounts/fireworks/models/llama-v3p3-70b-instruct",
     }
 
 
@@ -63,8 +63,8 @@ class GroqProvider(OpenAIBaseProvider):
     base_url = "https://api.groq.com/openai/v1"
     api_key = os.getenv("GROQ_API_KEY")
     aliases = {
-        "llama3.2": "llama-3.2-90b-vision-preview",
-        "llama3.3": "llama-3.3-70b-versatile",
+        "llama-3.2": "llama-3.2-90b-vision-preview",
+        "llama-3.3": "llama-3.3-70b-versatile",
     }
 
 
@@ -72,9 +72,7 @@ class MistralProvider(MistralBaseProvider):
     base_url = "https://api.mistral.ai/v1"
     api_key = os.getenv("MISTRAL_API_KEY")
     aliases = {
-        "small": "mistral-small-latest",
-        "medium": "mistral-medium-latest",
-        "large": "mistral-large-latest",
+        "mistral": "mistral-large-latest",
         "pixtral": "pixtral-large-latest",
     }
 
