@@ -23,7 +23,10 @@ class LlamaProvider(OpenAIBaseProvider):
 class OpenRouterProvider(OpenAIBaseProvider):
     base_url = "https://openrouter.ai/api/v1"
     api_key = os.getenv("OPENROUTER_API_KEY")
-    aliases = {"llama-3.2": "meta-llama/llama-3.2-90b-vision-instruct"}
+    aliases = {
+        "llama-3.2": "meta-llama/llama-3.2-90b-vision-instruct",
+        "qwen-2.5-vl":"qwen/qwen2.5-vl-72b-instruct:free"
+    }
 
 
 class FireworksProvider(OpenAIBaseProvider):
