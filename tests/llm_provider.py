@@ -18,7 +18,7 @@ tools = {
 
 
 # Function to simulate taking a screenshot
-def take_screenshot():
+def screenshot():
     with open("./tests/test_screenshot.png", "rb") as f:
         return f.read()
 
@@ -28,7 +28,7 @@ toolcall_messages = [
     Message(
         [
             "You can use tools to operate the computer. Take the next step to Google.com",
-            take_screenshot(),
+            screenshot(),
         ],
         role="user",
     )
@@ -39,7 +39,7 @@ messages = [
     Message(
         [
             "Describe what you see in the image below.",
-            take_screenshot(),
+            screenshot(),
         ],
         role="user",
     )

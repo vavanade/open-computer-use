@@ -69,8 +69,8 @@ class SandboxAgent:
                 f.write(image)
         return filepath
 
-    def take_screenshot(self):
-        file = self.sandbox.take_screenshot()
+    def screenshot(self):
+        file = self.sandbox.screenshot()
         filename = self.save_image(file, "screenshot")
         logger.log(f"screenshot {filename}", "gray")
         self.latest_screenshot = filename
@@ -117,7 +117,7 @@ class SandboxAgent:
 
     def click_element(self, query, click_command, action_name="click"):
         """Base method for all click operations"""
-        self.take_screenshot()
+        self.screenshot()
         position = grounding_model.call(query, self.latest_screenshot)
         dot_image = draw_big_dot(Image.open(self.latest_screenshot), position)
         filepath = self.save_image(dot_image, "location")
@@ -155,7 +155,7 @@ class SandboxAgent:
                 *self.messages,
                 Message(
                     [
-                        self.take_screenshot(),
+                        self.screenshot(),
                         "This image shows the current display of the computer. Please respond in the following format:\n"
                         "The objective is: [put the objective here]\n"
                         "On the screen, I see: [an extensive list of everything that might be relevant to the objective including windows, icons, menus, apps, and UI elements]\n"
