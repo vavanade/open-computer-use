@@ -1,4 +1,5 @@
-from os_computer_use.streaming import Sandbox, DisplayClient, Browser
+from os_computer_use.streaming import Sandbox, DisplayClient
+from os_computer_use.browser import Browser
 from os_computer_use.sandbox_agent import SandboxAgent
 from os_computer_use.logging import Logger
 import asyncio
@@ -39,7 +40,7 @@ async def start(user_input=None, output_dir=None):
 
         print("Starting the VNC client...")
         browser = Browser()
-        browser.start(vnc_url, user_input or "Sandbox")
+        browser.open(vnc_url)
 
         while True:
             # Ask for user input, and exit if the user presses ctl-c
@@ -83,7 +84,7 @@ async def start(user_input=None, output_dir=None):
 
         print("Stopping the VNC client...")
         try:
-            browser.stop()
+            browser.close()
         except Exception as e:
             print(f"Error stopping VNC client: {str(e)}")
 

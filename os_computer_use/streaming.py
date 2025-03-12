@@ -66,36 +66,3 @@ class DisplayClient:
             print(f"Stream saved successfully as {self.output_file}.")
         else:
             print(f"Failed to save the stream as {self.output_file}.")
-
-
-# Client to show a VNC client to the sandbox
-class Browser:
-    def __init__(self):
-        self.process = None
-
-    def start(self, stream_url, title="Sandbox"):
-        import subprocess
-        import os
-
-        # Script to launch a minimal web view
-        script_path = os.path.join(os.path.dirname(__file__), 'browser_script.py')
-
-        try:
-            # Start the browser script as a subprocess
-            self.process = subprocess.Popen(
-                [sys.executable, script_path, stream_url, title],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-        except Exception as e:
-            print(f"Failed to start browser: {e}")
-
-    def stop(self):
-        if self.process:
-            try:
-                os.killpg(os.getpgid(self.process.pid), signal.SIGTERM)
-                self.process = None
-            except ProcessLookupError:
-                print("Browser process not found.")
-            except Exception as e:
-                print(f"Failed to stop browser: {e}") 
