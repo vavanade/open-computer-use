@@ -21,7 +21,7 @@ async def start(user_input=None, output_dir=None):
     client = None
     
     try:
-        sandbox = Sandbox(template="desktop-dev-v2")
+        sandbox = Sandbox()
 
         # The display server won't work on desktop-dev-v2 since ffmpeg is not installed
         #client = DisplayClient(output_dir)
@@ -34,8 +34,8 @@ async def start(user_input=None, output_dir=None):
         agent = SandboxAgent(sandbox, output_dir)
 
         print("Starting the VNC server...")
-        sandbox.vnc_server.start()
-        vnc_url = sandbox.vnc_server.get_url()
+        sandbox.stream.start()
+        vnc_url = sandbox.stream.get_url()
 
         print("Starting the VNC client...")
         browser = Browser()

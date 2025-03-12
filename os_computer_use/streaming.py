@@ -1,4 +1,4 @@
-from os_computer_use.sandbox import Sandbox as SandboxBase
+from e2b_desktop import Sandbox as SandboxBase
 import asyncio
 import os
 import signal
