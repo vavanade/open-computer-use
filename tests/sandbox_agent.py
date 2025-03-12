@@ -7,7 +7,7 @@ class MockSandbox:
         self.timeout = 60
         self.commands = self
 
-    def take_screenshot(self):
+    def screenshot(self):
         with open("./tests/test_screenshot.png", "rb") as f:
             return f.read()
 
