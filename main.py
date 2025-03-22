@@ -7,6 +7,7 @@ import argparse
 
 import os
 from dotenv import load_dotenv
+import webbrowser
 
 logger = Logger()
 
@@ -29,8 +30,9 @@ async def start(user_input=None, output_dir=None):
         #print("Starting the display server...")
         #stream_url = sandbox.start_stream()
         #print("(The display client will start in five seconds.)")
-        # If the display client is opened before the stream is ready, it will close immediately
-        #await client.start(stream_url, user_input or "Sandbox", delay=5)
+        ## If the display client is opened before the stream is ready, it will close immediately
+        # await client.start(stream_url, user_input or "Sandbox", delay=5)
+        # webbrowser.open_new_tab(stream_url)
 
         agent = SandboxAgent(sandbox, output_dir)
 
@@ -42,31 +44,18 @@ async def start(user_input=None, output_dir=None):
         browser = Browser()
         browser.open(vnc_url)
 
-        while True:
-            # Ask for user input, and exit if the user presses ctl-c
-            if user_input is None:
-                try:
-                    user_input = input("USER: ")
-                except KeyboardInterrupt:
-                    break
-            # Run the agent, and go back to the prompt if the user presses ctl-c
-            else:
-                try:
-                    agent.run(user_input)
-                    user_input = None
-                except KeyboardInterrupt:
-                    user_input = None
-                except Exception as e:
-                    logger.print_colored(f"An error occurred: {e}", "red")
-                    user_input = None
+        if not user_input:
+            raise ValueError("Provide input!")
+
+        agent.run(user_input)
 
     finally:
-        #if client:
-        #    print("Stopping the display client...")
-        #    try:
-        #        await client.stop()
-        #    except Exception as e:
-        #        print(f"Error stopping display client: {str(e)}")
+        if client:
+           print("Stopping the display client...")
+           try:
+               await client.stop()
+           except Exception as e:
+               print(f"Error stopping display client: {str(e)}")
 
         if sandbox:
             print("Stopping the sandbox...")
@@ -105,3 +94,8 @@ def main():
     output_dir = initialize_output_directory(lambda id: f"./output/run_{id}")
     loop = asyncio.get_event_loop()
     loop.run_until_complete(start(user_input=args.prompt, output_dir=output_dir))
+    print("done")
+
+
+if __name__ == "__main__":
+    main()

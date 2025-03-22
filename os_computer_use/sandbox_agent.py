@@ -26,7 +26,7 @@ class SandboxAgent:
         super().__init__()
         self.messages = []  # Agent memory
         self.sandbox = sandbox  # E2B sandbox
-        self.latest_screenshot = None  # Most recent PNG of the scren
+        self.latest_screenshot = None  # Most recent PNG of the screen
         self.image_counter = 0  # Current screenshot number
         self.tmp_dir = tempfile.mkdtemp()  # Folder to store screenshots
 
@@ -51,6 +51,7 @@ class SandboxAgent:
         else:
             return "Function not implemented."
 
+    @staticmethod
     def tool(description, params):
         def decorator(func):
             tools[func.__name__] = {"description": description, "params": params}
